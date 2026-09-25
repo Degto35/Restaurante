@@ -1,6 +1,6 @@
 ﻿namespace Restaurante.Web.Models
 {
-    public class Categoria
+    public class Mesas
     {
     }
 }
