@@ -1,6 +1,6 @@
 ﻿namespace Restaurante.Web.Services
 {
-    public class _
+    public class IClienteService
     {
     }
 }
