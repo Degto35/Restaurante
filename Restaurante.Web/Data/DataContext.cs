@@ -1,6 +1,6 @@
 ﻿namespace Restaurante.Web.Data
 {
-    public class _
+    public class DataContext
     {
     }
 }
