@@ -1,6 +1,6 @@
 ﻿namespace Restaurante.Web.Models
 {
-    public class Usuarios
+    public class Usuario
     {
     }
 }
