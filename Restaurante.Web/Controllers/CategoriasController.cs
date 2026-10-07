@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Restaurante.Web.DTOs.Categorias;
-using Restaurante.Web.Services;
+using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Controllers
 {

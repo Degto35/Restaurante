@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Restaurante.Web.DTOs.Platos;
-using Restaurante.Web.Services;
+using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Controllers
 {

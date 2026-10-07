@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore; 
-using Restaurante.Web.Data;         
-using Restaurante.Web.Services;
+using Microsoft.EntityFrameworkCore;
+using Restaurante.Web.Data;
+using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Services.Implementations;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -8,13 +9,17 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection")));
-// NOTA: "DefaultConnection" debe ser el nombre exacto que pusiste en appsettings.json
+// NOTA: MyConnection" debe ser el nombre exacto que pusiste en appsettings.json
 
 // 2. Registrar tus Servicios (Interfaz -> Implementación)
 builder.Services.AddScoped<ICategoriasService, CategoriasService>();
 builder.Services.AddScoped<IPlatosService, PlatosService>();
+builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IEmpleadosService, EmpleadosService>();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

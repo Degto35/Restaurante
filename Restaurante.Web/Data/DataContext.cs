@@ -13,7 +13,8 @@ namespace Restaurante.Web.Data
 
         public DbSet<Categorias> Categorias { get; set; }
         public DbSet<Plato> Plato { get; set; }
-        // TODO: descomentar cuando se complete cada entidad
+        public DbSet<Rol> Roles { get; set; }
+        public DbSet<Empleado> Empleados { get; set; }
         // public DbSet<Clientes> Clientes { get; set; }
         // public DbSet<Cuentas> Cuentas { get; set; }
         // public DbSet<DetallePedido> DetallesPedido { get; set; }
@@ -29,6 +30,13 @@ namespace Restaurante.Web.Data
                 .WithMany(c => c.Plato)           // Una Categoria tiene muchos Platos
                 .HasForeignKey(p => p.IdCategorias) // La FK es IdCategoria en Plato
                 .OnDelete(DeleteBehavior.Restrict); // Evita borrar la categoría si tiene platos asociados
+
+
+            modelBuilder.Entity<Empleado>()
+                .HasOne(e => e.Rol)
+                .WithMany(r => r.Empleados)
+                .HasForeignKey(e => e.IdRol)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
