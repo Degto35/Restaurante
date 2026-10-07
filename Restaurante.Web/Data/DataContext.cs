@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Models;
+using Restaurante.Web.Models.Restaurante.Web.Models;
 
 namespace Restaurante.Web.Data
 {
@@ -11,13 +12,13 @@ namespace Restaurante.Web.Data
         }
 
         public DbSet<Categorias> Categorias { get; set; }
-        public DbSet<Cliente> Clientes { get; set; }
-        public DbSet<Cuenta> Cuentas { get; set; }
+        public DbSet<Clientes> Clientes { get; set; }
+        public DbSet<Cuentas> Cuentas { get; set; }
         public DbSet<DetallePedido> DetallesPedido { get; set; }
-        public DbSet<Mesa> Mesas { get; set; }
-        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<Mesas> Mesas { get; set; }
+        public DbSet<Pedidos> Pedidos { get; set; }
         public DbSet<Plato> Plato { get; set; }
-        public DbSet<Rol> Roles { get; set; }
+        public DbSet<Roles> Roles { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

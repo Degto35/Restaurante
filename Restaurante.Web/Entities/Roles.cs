@@ -1,4 +1,4 @@
-﻿namespace Restaurante.Web.Models
+﻿namespace Restaurante.Web.Entities
 {
     public class Roles
     {

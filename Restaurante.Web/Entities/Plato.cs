@@ -1,7 +1,10 @@
-﻿namespace Restaurante.Web.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Restaurante.Web.Models
 {
     public class Plato
     {
+        [Key]
         public int IdPlato { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string? Descripcion { get; set; }

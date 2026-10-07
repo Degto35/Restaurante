@@ -105,7 +105,7 @@ namespace Restaurante.Web.Controllers
         private async Task CargarCategoriasEnViewBag(int? idCategoriaSeleccionada = null)
         {
             var categorias = await _categoriaService.ObtenerTodasAsync();
-            ViewBag.Categorias = new SelectList(categorias, "IdCategoria", "Nombre", idCategoriaSeleccionada);
+            ViewBag.Categorias = new SelectList(categorias, "IdCategorias", "Nombre", idCategoriaSeleccionada);
         }
     }
 }

@@ -57,7 +57,7 @@ namespace Restaurante.Web.Services
                 Nombre = dto.Nombre,
                 Descripcion = dto.Descripcion,
                 Precio = dto.Precio,
-                IdCategorias = dto.IdCategoria,
+                IdCategorias = dto.IdCategorias,
                 Estado = true
             };
 
