@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data;
 using Restaurante.Web.DTOs.Categorias;
-using Restaurante.Web.Models;
+using Restaurante.Web.Entities;
+using Restaurante.Web.Data.Entities;
 
 namespace Restaurante.Web.Services
 {
@@ -26,7 +27,7 @@ namespace Restaurante.Web.Services
                 }).ToListAsync();
         }
 
-        public async Task<CategoriaDTO?> ObtenerPorIdAsync(int id)
+        public async Task<CategoriaDTO?> ObtenerPorIdAsync(Guid id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
             if (categoria == null) return null;
@@ -67,7 +68,7 @@ namespace Restaurante.Web.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> EliminarAsync(int id)
+        public async Task<bool> EliminarAsync(Guid id)
         {
             var categoria = await _context.Categorias.FindAsync(id);
             if (categoria == null) return false;

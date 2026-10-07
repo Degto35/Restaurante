@@ -18,7 +18,7 @@ namespace Restaurante.Web.Controllers
             var categorias = await _categoriaService.ObtenerTodasAsync();
             return View(categorias);
         }
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             var categoria = await _categoriaService.ObtenerPorIdAsync(id);
             if (categoria == null) return NotFound();
@@ -47,7 +47,7 @@ namespace Restaurante.Web.Controllers
             return View(dto);
         }
 
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             var categoria = await _categoriaService.ObtenerPorIdAsync(id);
             if (categoria == null) return NotFound();
@@ -78,7 +78,7 @@ namespace Restaurante.Web.Controllers
             }
             return View(dto);
         }
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var categoria = await _categoriaService.ObtenerPorIdAsync(id);
             if (categoria == null) return NotFound();
@@ -87,7 +87,7 @@ namespace Restaurante.Web.Controllers
         }
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var resultado = await _categoriaService.EliminarAsync(id);
             if (resultado)

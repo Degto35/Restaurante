@@ -16,6 +16,6 @@ namespace Restaurante.Web.DTOs.Platos
         public decimal Precio { get; set; }
 
         [Required(ErrorMessage = "Debe seleccionar una categoría")]
-        public int IdCategoria { get; set; }
+        public Guid IdCategorias { get; set; }
     }
 }
