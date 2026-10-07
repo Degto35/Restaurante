@@ -1,7 +1,7 @@
-﻿@model IEnumerable<Restaurante.Web.DTOs.Roles.RolDTO>
+﻿@model IEnumerable<Restaurante.Web.DTOs.Empleados.EmpleadoDTO>
 
 @{
-    ViewData["Title"] = "Lista de Roles";
+    ViewData["Title"] = "Lista de Empleados";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -21,12 +21,15 @@
     </div>
 }
 
-<p><a asp-action="Create" class="btn btn-primary">Crear Nuevo Rol</a></p>
+<p><a asp-action="Create" class="btn btn-primary">Crear Nuevo Empleado</a></p>
 
 <table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>Nombre del rol</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo electrónico</th>
+            <th>Rol</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -34,10 +37,14 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>@item.Nombre</td>
+                <td>@item.Telefono</td>
+                <td>@item.Email</td>
                 <td>@item.NombreRol</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdRol" class="btn btn-warning btn-sm">Editar</a>
-                    <a asp-action="Delete" asp-route-id="@item.IdRol" class="btn btn-danger btn-sm">Eliminar</a>
+                    <a asp-action="Edit" asp-route-id="@item.IdEmpleado" class="btn btn-warning btn-sm">Editar</a>
+                    <a asp-action="Details" asp-route-id="@item.IdEmpleado" class="btn btn-info btn-sm">Detalles</a>
+                    <a asp-action="Delete" asp-route-id="@item.IdEmpleado" class="btn btn-danger btn-sm">Eliminar</a>
                 </td>
             </tr>
         }
