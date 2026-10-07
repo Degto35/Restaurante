@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data;
 using Restaurante.Web.DTOs.Platos;
-using Restaurante.Web.Models;
+using Restaurante.Web.Entities;
+using Restaurante.Web.Data.Entities;
 
 namespace Restaurante.Web.Services
 {
@@ -30,7 +31,7 @@ namespace Restaurante.Web.Services
                 }).ToListAsync();
         }
 
-        public async Task<PlatoDTO?> ObtenerPorIdAsync(int id)
+        public async Task<PlatoDTO?> ObtenerPorIdAsync(Guid id)
         {
             var plato = await _context.Plato
                 .Include(p => p.Categorias)
@@ -80,13 +81,13 @@ namespace Restaurante.Web.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> EliminarAsync(int id)
+        public async Task<bool> EliminarAsync(Guid id)
         {
             var plato = await _context.Plato.FindAsync(id);
             if (plato == null) return false;
 
-            var estaEnPedido = await _context.DetallesPedido.AnyAsync(d => d.IdPlato == id);
-            if (estaEnPedido) return false;
+            //var estaEnPedido = await _context.DetallesPedido.AnyAsync(d => d.IdPlato == id);
+            //if (estaEnPedido) return false;
 
             _context.Plato.Remove(plato);
             return await _context.SaveChangesAsync() > 0;

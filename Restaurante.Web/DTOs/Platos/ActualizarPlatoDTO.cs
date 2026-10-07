@@ -5,7 +5,7 @@ namespace Restaurante.Web.DTOs.Platos
     public class ActualizarPlatoDTO
     {
         [Required]
-        public int IdPlato { get; set; }
+        public Guid IdPlato { get; set; }
 
         [Required(ErrorMessage = "El nombre del plato es obligatorio")]
         [StringLength(100)]
@@ -19,7 +19,7 @@ namespace Restaurante.Web.DTOs.Platos
         public decimal Precio { get; set; }
 
         [Required(ErrorMessage = "Debe seleccionar una categoría")]
-        public int IdCategorias { get; set; }
+        public Guid IdCategorias { get; set; }
 
         public bool Estado { get; set; }
     }

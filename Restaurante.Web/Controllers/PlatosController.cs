@@ -44,7 +44,7 @@ namespace Restaurante.Web.Controllers
             return View(dto);
         }
 
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             var plato = await _platoService.ObtenerPorIdAsync(id);
             if (plato == null) return NotFound();
@@ -80,7 +80,7 @@ namespace Restaurante.Web.Controllers
             await CargarCategoriasEnViewBag(dto.IdCategorias);
             return View(dto);
         }
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var plato = await _platoService.ObtenerPorIdAsync(id);
             if (plato == null) return NotFound();
@@ -89,7 +89,7 @@ namespace Restaurante.Web.Controllers
         }
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             var resultado = await _platoService.EliminarAsync(id);
             if (resultado)
@@ -102,7 +102,8 @@ namespace Restaurante.Web.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        private async Task CargarCategoriasEnViewBag(int? idCategoriaSeleccionada = null)
+        private async Task CargarCategoriasEnViewBag(Guid
+            ? idCategoriaSeleccionada = null)
         {
             var categorias = await _categoriaService.ObtenerTodasAsync();
             ViewBag.Categorias = new SelectList(categorias, "IdCategorias", "Nombre", idCategoriaSeleccionada);
