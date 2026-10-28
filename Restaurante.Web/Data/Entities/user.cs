@@ -17,5 +17,6 @@ namespace Restaurante.Web.Data.Entities
         [MaxLength(100, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido")]
         public string Email { get; set; } = string.Empty;
+
     }
 }
