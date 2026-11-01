@@ -15,7 +15,7 @@ namespace Restaurante.Web.Data
         public DbSet<Plato> Plato { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Empleado> Empleados { get; set; }
-        // public DbSet<Clientes> Clientes { get; set; }
+        public DbSet<user> Users { get; set; } 
         // public DbSet<Cuentas> Cuentas { get; set; }
         // public DbSet<DetallePedido> DetallesPedido { get; set; }
         // public DbSet<Mesas> Mesas { get; set; }
@@ -37,6 +37,12 @@ namespace Restaurante.Web.Data
                 .WithMany(r => r.Empleados)
                 .HasForeignKey(e => e.IdRol)
                 .OnDelete(DeleteBehavior.Restrict);
+            // OJO: activar cuando exista la clase Pedidos que corresponde a (Juan) ATT: Dylan.
+            // modelBuilder.Entity<Pedidos>()
+            //     .HasOne(p => p.user)
+            //     .WithMany(u => u.Pedidos)
+            //     .HasForeignKey(p => p.IdUser)
+            //     .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
