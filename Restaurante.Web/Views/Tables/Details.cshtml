@@ -1,5 +1,40 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Restaurante.Web.DTOs.Tables.TableDTO
+
 @{
+    ViewData["Title"] = "Detalles de la Mesa";
 }
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h4 class="card-title mb-0">Detalles de Mesa #@Model.Number</h4>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Número de Mesa:</dt>
+                    <dd class="col-sm-7 fw-bold">Mesa #@Model.Number</dd>
+
+                    <dt class="col-sm-5">Capacidad:</dt>
+                    <dd class="col-sm-7">@Model.Capacity personas</dd>
+
+                    <dt class="col-sm-5">Estado actual:</dt>
+                    <dd class="col-sm-7">
+                        @if (Model.IsAvailable)
+                        {
+                            <span class="badge bg-success">Disponible</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Ocupada / No Disponible</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+                <a asp-action="Edit" asp-route-id="@Model.IdTable" class="btn btn-primary">Editar Mesa</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -17,9 +17,9 @@ namespace Restaurante.Web.Data
         public DbSet<Employees> Employees { get; set; }
         // public DbSet<Clientes> Clientes { get; set; }
         // public DbSet<Accounts> Accounts { get; set; }
-        // public DbSet<Orderdetails> Orderdetails { get; set; }
-        // public DbSet<Tables> Tables { get; set; }
-        // public DbSet<Orders> Orders { get; set; }
+        public DbSet<OrderDetails> OrderDetails { get; set; }
+         public DbSet<DiningTable> Tables { get; set; }
+        public DbSet<Orders> Orders { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
