@@ -17,5 +17,7 @@ namespace Restaurante.Web.DTOs.Orders
         public List<OrderDetailDTO> OrderDetails { get; set; } = new List<OrderDetailDTO>();
 
         public decimal Total => OrderDetails.Sum(d => d.Subtotal);
+
+        public bool IsClosed => Status == OrderStatus.Paid || Status == OrderStatus.Cancelled;
     }
 }

@@ -17,6 +17,7 @@ builder.Services.AddScoped<IDishesService, DishesService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<ITablesService, TablesService>();
+builder.Services.AddScoped<IOrdersService, OrdersService>();
 
 var app = builder.Build();
 
