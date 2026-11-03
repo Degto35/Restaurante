@@ -91,7 +91,7 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<IEnumerable<SelectListItem>> ObtenerRolesAsync()
         {
-            return await _context.Role
+            return await _context.Roles
                 .OrderBy(r => r.NameRole)
                 .Select(r => new SelectListItem
                 {

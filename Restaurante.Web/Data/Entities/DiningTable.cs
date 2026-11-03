@@ -16,6 +16,6 @@ namespace Restaurante.Web.Data.Entities
 
         public bool IsAvailable { get; set; } = true;
 
-        public ICollection<Orders> Orders { get; set; } = new List<Orders>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

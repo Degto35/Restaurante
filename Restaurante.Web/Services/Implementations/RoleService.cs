@@ -18,14 +18,14 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<List<RoleDTO>> ObtenerTodosAsync()
         {
-            return await _context.Role
+            return await _context.Roles
                 .Select(r => new RoleDTO { IdRole = r.IdRole, NameRole = r.NameRole })
                 .ToListAsync();
         }
 
         public async Task<RoleDTO?> ObtenerPorIdAsync(Guid id)
         {
-            var rol = await _context.Role.FindAsync(id);
+            var rol = await _context.Roles.FindAsync(id);
             if (rol == null) return null;
 
             return new RoleDTO { IdRole = rol.IdRole, NameRole = rol.NameRole };
@@ -39,30 +39,30 @@ namespace Restaurante.Web.Services.Implementations
                 NameRole = dto.NameRole
             };
 
-            _context.Role.Add(rol);
+            _context.Roles.Add(rol);
             return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> ActualizarAsync(UpdateRoleDTO dto)
         {
-            var role = await _context.Role.FindAsync(dto.IdRole);
+            var role = await _context.Roles.FindAsync(dto.IdRole);
             if (role == null) return false;
 
             role.NameRole = dto.NameRole;
 
-            _context.Role.Update(role);
+            _context.Roles.Update(role);
             return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> EliminarAsync(Guid id)
         {
-            var role = await _context.Role.FindAsync(id);
+            var role = await _context.Roles.FindAsync(id);
             if (role == null) return false;
 
             var tieneEmpleados = await _context.Employees.AnyAsync(e => e.IdRole == id);
             if (tieneEmpleados) return false;
 
-            _context.Role.Remove(role);
+            _context.Roles.Remove(role);
             return await _context.SaveChangesAsync() > 0;
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Restaurante.Web.Data.Entities;          // <- NUEVO
+using System.ComponentModel.DataAnnotations;
 
 namespace Restaurante.Web.Entities
 {
@@ -23,5 +24,7 @@ namespace Restaurante.Web.Entities
         public Guid IdRole { get; set; }
 
         public Role Role { get; set; } = null!;
+
+        public ICollection<Order> Orders { get; set; } = new List<Order>();   // <- NUEVO
     }
 }

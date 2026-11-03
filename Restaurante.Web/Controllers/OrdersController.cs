@@ -1,6 +1,8 @@
-﻿namespace Restaurante.Web.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Restaurante.Web.Controllers
 {
-    public class OrdersController
+    public class OrdersController : Controller
     {
     }
 }
