@@ -22,6 +22,32 @@ namespace Restaurante.Web.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Bill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Bills");
+                });
+
             modelBuilder.Entity("Restaurante.Web.Data.Entities.DiningTable", b =>
                 {
                     b.Property<Guid>("IdTable")
@@ -195,6 +221,17 @@ namespace Restaurante.Web.Migrations
                     b.ToTable("Roles");
                 });
 
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Bill", b =>
+                {
+                    b.HasOne("Restaurante.Web.Data.Entities.Order", "Order")
+                        .WithOne("Bill")
+                        .HasForeignKey("Restaurante.Web.Data.Entities.Bill", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
                 {
                     b.HasOne("Restaurante.Web.Data.Entities.DiningTable", "DiningTable")
@@ -262,6 +299,8 @@ namespace Restaurante.Web.Migrations
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
                 {
+                    b.Navigation("Bill");
+
                     b.Navigation("OrderDetails");
                 });
 

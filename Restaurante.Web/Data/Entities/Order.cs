@@ -23,6 +23,8 @@ namespace Restaurante.Web.Data.Entities
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
+        public Bill? Bill { get; set; }
+
         [NotMapped]
         public decimal Total => OrderDetails.Sum(d => d.Subtotal);
     }
