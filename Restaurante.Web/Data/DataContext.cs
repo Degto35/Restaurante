@@ -11,31 +11,54 @@ namespace Restaurante.Web.Data
         {
         }
 
-        public DbSet<Categorias> Categorias { get; set; }
-        public DbSet<Plato> Plato { get; set; }
-        public DbSet<Rol> Roles { get; set; }
-        public DbSet<Empleado> Empleados { get; set; }
-        // public DbSet<Clientes> Clientes { get; set; }
-        // public DbSet<Cuentas> Cuentas { get; set; }
-        // public DbSet<DetallePedido> DetallesPedido { get; set; }
-        // public DbSet<Mesas> Mesas { get; set; }
-        // public DbSet<Pedidos> Pedidos { get; set; }
+        public DbSet<Categories> Categories { get; set; }
+        public DbSet<Dishes> Dishes { get; set; }
+        public DbSet<Role> Roles { get; set; }                  
+        public DbSet<Employees> Employees { get; set; }
+        public DbSet<DiningTable> DiningTables { get; set; }    
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            
-            modelBuilder.Entity<Plato>()
-                .HasOne(p => p.Categorias)          // Un Plato tiene una Categoria
-                .WithMany(c => c.Plato)           // Una Categoria tiene muchos Platos
-                .HasForeignKey(p => p.IdCategorias) // La FK es IdCategoria en Plato
-                .OnDelete(DeleteBehavior.Restrict); // Evita borrar la categoría si tiene platos asociados
+            modelBuilder.Entity<Dishes>()
+                .HasOne(d => d.Category)
+                .WithMany(c => c.Dishes)
+                .HasForeignKey(d => d.IdCategories)
+                .OnDelete(DeleteBehavior.Restrict);
 
+      
+            modelBuilder.Entity<Employees>()
+                .HasOne(e => e.Role)
+                .WithMany(r => r.Employees)
+                .HasForeignKey(e => e.IdRole)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Empleado>()
-                .HasOne(e => e.Rol)
-                .WithMany(r => r.Empleados)
-                .HasForeignKey(e => e.IdRol)
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.DiningTable)
+                .WithMany(t => t.Orders)
+                .HasForeignKey(o => o.DiningTableId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+          
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Employee)
+                .WithMany(e => e.Orders)
+                .HasForeignKey(o => o.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(d => d.Order)
+                .WithMany(o => o.OrderDetails)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(d => d.Dish)
+                .WithMany()
+                .HasForeignKey(d => d.DishId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

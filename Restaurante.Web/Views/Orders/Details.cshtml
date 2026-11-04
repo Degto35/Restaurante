@@ -1,0 +1,137 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@using Restaurante.Web.Core.Extensions
+@using Restaurante.Web.Data.Enums
+@model Restaurante.Web.DTOs.Orders.OrderDTO
+
+@{
+    ViewData["Title"] = "Detalle del Pedido";
+
+    var statusItems = Enum.GetValues<OrderStatus>()
+        .Select(s => new SelectListItem(s.ToDisplayName(), s.ToString(), s == Model.Status));
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Exito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3"><strong>Mesa:</strong> @Model.TableNumber</div>
+            <div class="col-md-3"><strong>Mesero:</strong> @Model.EmployeeName</div>
+            <div class="col-md-3"><strong>Fecha:</strong> @Model.Date.ToString("dd/MM/yyyy HH:mm")</div>
+            <div class="col-md-3">
+                <strong>Estado:</strong>
+                <span class="badge @Model.Status.ToBadgeClass()">@Model.Status.ToDisplayName()</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4>Platos del pedido</h4>
+
+@if (!Model.OrderDetails.Any())
+{
+    <p class="text-muted">Este pedido aún no tiene platos.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Plato</th>
+                <th class="text-end">Cantidad</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Subtotal</th>
+                @if (!Model.IsClosed)
+                {
+                    <th></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var line in Model.OrderDetails)
+            {
+                <tr>
+                    <td>@line.DishName</td>
+                    <td class="text-end">@line.Quantity</td>
+                    <td class="text-end">@line.UnitPrice.ToString("C")</td>
+                    <td class="text-end">@line.Subtotal.ToString("C")</td>
+                    @if (!Model.IsClosed)
+                    {
+                        <td class="text-end">
+                            <form asp-action="RemoveDetail" method="post" class="d-inline">
+                                <input type="hidden" name="detailId" value="@line.Id" />
+                                <input type="hidden" name="orderId" value="@Model.Id" />
+                                <button type="submit" class="btn btn-danger btn-sm">Quitar</button>
+                            </form>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="text-end">Total</th>
+                <th class="text-end">@Model.Total.ToString("C")</th>
+                @if (!Model.IsClosed)
+                {
+                    <th></th>
+                }
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@if (!Model.IsClosed)
+{
+    <div class="row mt-4">
+        <div class="col-md-7">
+            <h5>Agregar plato</h5>
+            <form asp-action="AddDetail" method="post" class="row g-2">
+                <input type="hidden" name="OrderId" value="@Model.Id" />
+                <div class="col-sm-7">
+                    <select name="DishId" class="form-select" asp-items="ViewBag.Dishes">
+                        <option value="">-- Seleccione un plato --</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <input type="number" name="Quantity" value="1" min="1" max="100" class="form-control" />
+                </div>
+                <div class="col-sm-3">
+                    <button type="submit" class="btn btn-success w-100">Agregar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-5">
+            <h5>Cambiar estado</h5>
+            <form asp-action="UpdateStatus" method="post" class="row g-2">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="col-sm-8">
+                    <select name="Status" class="form-select" asp-items="statusItems"></select>
+                </div>
+                <div class="col-sm-4">
+                    <button type="submit" class="btn btn-warning w-100">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+</div>

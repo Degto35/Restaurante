@@ -12,10 +12,12 @@ builder.Services.AddDbContext<DataContext>(options =>
 // NOTA: MyConnection" debe ser el nombre exacto que pusiste en appsettings.json
 
 // 2. Registrar tus Servicios (Interfaz -> Implementación)
-builder.Services.AddScoped<ICategoriasService, CategoriasService>();
-builder.Services.AddScoped<IPlatosService, PlatosService>();
-builder.Services.AddScoped<IRolesService, RolesService>();
-builder.Services.AddScoped<IEmpleadosService, EmpleadosService>();
+builder.Services.AddScoped<ICategoriesService, CategoriesService>();
+builder.Services.AddScoped<IDishesService, DishesService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IEmployeesService, EmployeesService>();
+builder.Services.AddScoped<ITablesService, TablesService>();
+builder.Services.AddScoped<IOrdersService, OrdersService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Restaurante.Web.DTOs.Tables.TableDTO>
+
+@{
+    ViewData["Title"] = "Gestión de Mesas";
+}
+
+<h1 class="mb-3">Gestión de Mesas</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Crear Nueva Mesa</a>
+</p>
+
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Exito"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Capacidad</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var table in Model)
+        {
+            <tr>
+                <td>Mesa #@table.Number</td>
+                <td>@table.Capacity personas</td>
+                <td>
+                    @if (table.IsAvailable)
+                    {
+                        <span class="badge bg-success">Disponible</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Ocupada</span>
+                    }
+                </td>
+                <td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@table.IdTable" class="btn btn-sm btn-warning text-dark">Editar</a>
+                        <a asp-action="Details" asp-route-id="@table.IdTable" class="btn btn-sm btn-info text-dark">Detalles</a>
+                        <a asp-action="Delete" asp-route-id="@table.IdTable" class="btn btn-sm btn-danger">Eliminar</a>
+                    </td>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

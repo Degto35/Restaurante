@@ -1,0 +1,34 @@
+﻿@model Restaurante.Web.DTOs.Tables.CreateTableDTO
+
+@{
+    ViewData["Title"] = "Crear Mesa";
+}
+
+<h1>Crear Mesa</h1>
+
+<h4>Mesa</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Number" class="control-label">Número</label>
+                <input asp-for="Number" class="form-control" type="number" min="1" />
+                <span asp-validation-for="Number" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Capacity" class="control-label">Capacidad</label>
+                <input asp-for="Capacity" class="form-control" type="number" min="1" max="50" />
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-3">
+                <button type="submit" class="btn btn-primary">Crear</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

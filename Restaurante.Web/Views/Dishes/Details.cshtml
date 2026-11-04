@@ -1,0 +1,30 @@
+﻿@model Restaurante.Web.DTOs.Dishes.DishDTO
+
+@{
+    ViewData["Title"] = "Detalles del Plato";
+}
+
+<h1>Detalles del Plato</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Name)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Name)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Description)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Description)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Price)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Price)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.CategoryName)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.CategoryName)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.State)</dt>
+        <dd class="col-sm-10">@(Model.State ? "Activo" : "Inactivo")</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.IdDish" class="btn btn-warning">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+</div>
