@@ -7,7 +7,11 @@
     ViewData["Title"] = "Detalle del Pedido";
 
     var statusItems = Enum.GetValues<OrderStatus>()
+        .Where(s => s != OrderStatus.Paid)
         .Select(s => new SelectListItem(s.ToDisplayName(), s.ToString(), s == Model.Status));
+
+    var paymentItems = Enum.GetValues<PaymentMethod>()                                     
+        .Select(m => new SelectListItem(m.ToDisplayName(), m.ToString()));
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -38,6 +42,16 @@
                 <span class="badge @Model.Status.ToBadgeClass()">@Model.Status.ToDisplayName()</span>
             </div>
         </div>
+
+        @if (Model.PaymentMethod != null)                                                    
+        {
+            <div class="row mt-2">
+                <div class="col-12">
+                    <strong>Pagado con:</strong> @Model.PaymentMethod.Value.ToDisplayName()
+                    el @(Model.PaidAt?.ToString("dd/MM/yyyy HH:mm"))
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -130,6 +144,24 @@ else
             </form>
         </div>
     </div>
+
+    @if (Model.OrderDetails.Any())                                                          
+    {
+        <div class="row mt-3">
+            <div class="col-md-7">
+                <h5>Pagar pedido</h5>
+                <form asp-action="Pay" method="post" class="row g-2">
+                    <input type="hidden" name="OrderId" value="@Model.Id" />
+                    <div class="col-sm-5">
+                        <select name="PaymentMethod" class="form-select" asp-items="paymentItems"></select>
+                    </div>
+                    <div class="col-sm-5">
+                        <button type="submit" class="btn btn-success w-100">Pagar @Model.Total.ToString("C")</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
 }
 
 <div class="mt-4">

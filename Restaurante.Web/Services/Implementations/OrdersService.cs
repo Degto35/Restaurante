@@ -24,6 +24,8 @@ namespace Restaurante.Web.Services.Implementations
             Id = o.Id,
             Date = o.Date,
             Status = o.Status,
+            PaymentMethod = o.Bill != null ? (PaymentMethod?)o.Bill.PaymentMethod : null,
+            PaidAt = o.Bill != null ? (DateTime?)o.Bill.PaidAt : null,
             DiningTableId = o.DiningTableId,
             TableNumber = o.DiningTable.Number,
             EmployeeId = o.EmployeeId,
@@ -149,9 +151,9 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("Un pedido pagado o cancelado ya no se puede modificar.");
                 }
 
-                if (dto.Status == OrderStatus.Paid && !order.OrderDetails.Any())
+                if (dto.Status == OrderStatus.Paid)
                 {
-                    return Response.Failure("No se puede pagar un pedido sin platos.");
+                    return Response.Failure("Para pagar un pedido use la opción Pagar.");
                 }
 
                 order.Status = dto.Status;
@@ -247,6 +249,57 @@ namespace Restaurante.Web.Services.Implementations
                 await _context.SaveChangesAsync();
 
                 return Response.Success("Plato eliminado del pedido.");
+            }
+            catch (Exception ex)
+            {
+                return Response.Failure(ex);
+            }
+        }
+
+        public async Task<Response> PayAsync(PayOrderDTO dto)
+        {
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.DiningTable)
+                    .Include(o => o.OrderDetails)
+                    .FirstOrDefaultAsync(o => o.Id == dto.OrderId);
+
+                if (order is null)
+                {
+                    return Response.Failure("El pedido no existe.");
+                }
+
+                if (IsClosed(order.Status))
+                {
+                    return Response.Failure("El pedido ya está cerrado.");
+                }
+
+                if (!order.OrderDetails.Any())
+                {
+                    return Response.Failure("No se puede pagar un pedido sin platos.");
+                }
+
+                if (!Enum.IsDefined(dto.PaymentMethod))
+                {
+                    return Response.Failure("El método de pago no es válido.");
+                }
+
+                Bill bill = new()
+                {
+                    OrderId = order.Id,
+                    PaymentMethod = dto.PaymentMethod,
+                    PaidAt = DateTime.Now,
+                    Total = order.Total
+                };
+
+                order.Status = OrderStatus.Paid;
+                order.DiningTable.IsAvailable = true;
+                _context.Bills.Add(bill);
+
+                await _context.SaveChangesAsync();
+
+                return Response.Success("Pago registrado correctamente.");
             }
             catch (Exception ex)
             {

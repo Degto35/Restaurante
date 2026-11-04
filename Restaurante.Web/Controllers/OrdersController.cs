@@ -117,7 +117,16 @@ namespace Restaurante.Web.Controllers
             return RedirectToAction(nameof(Details), new { id = dto.Id });
         }
 
-        // Dropdowns for the Create form: only available tables and all employees.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Pay(PayOrderDTO dto)
+        {
+            Response response = await _ordersService.PayAsync(dto);
+
+            TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
+            return RedirectToAction(nameof(Details), new { id = dto.OrderId });
+        }
+
         private async Task LoadCreateListsAsync()
         {
             var tables = await _tablesService.ObtenerTodasAsync();
@@ -141,7 +150,7 @@ namespace Restaurante.Web.Controllers
                 .ToList();
         }
 
-        // Dropdown for the "add dish" form on the Details page: only active dishes.
+        
         private async Task LoadDishesAsync()
         {
             var dishes = await _dishesService.ObtenerTodosAsync();

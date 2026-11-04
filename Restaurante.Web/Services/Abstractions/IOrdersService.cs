@@ -11,5 +11,6 @@ namespace Restaurante.Web.Services.Abstractions
         Task<Response> UpdateStatusAsync(UpdateOrderDTO dto);
         Task<Response> AddDetailAsync(CreateOrderDetailDTO dto);
         Task<Response> RemoveDetailAsync(Guid detailId);
+        Task<Response> PayAsync(PayOrderDTO dto);
     }
 }
