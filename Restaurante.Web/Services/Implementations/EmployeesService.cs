@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data;
 using Restaurante.Web.DTOs.Employees;
-using Restaurante.Web.Entities;
 using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Data.Entities;
 
 namespace Restaurante.Web.Services.Implementations
 {
@@ -21,12 +21,12 @@ namespace Restaurante.Web.Services.Implementations
             return await _context.Employees
                 .Select(e => new EmployeesDTO
                 {
-                    IdEmployee = e.IdEmployee,
+                    IdEmployee = e.Id,
                     Name = e.Name,
                     Telephone = e.Telephone,
                     Email = e.Email,
-                    IdRole = e.IdRole,
-                    NameRole = e.Role.NameRole
+                    IdRole = e.RoleId,
+                    NameRole = e.Role.Name
                 }).ToListAsync();
         }
 
@@ -34,30 +34,30 @@ namespace Restaurante.Web.Services.Implementations
         {
             var employee = await _context.Employees
                 .Include(e => e.Role)
-                .FirstOrDefaultAsync(e => e.IdEmployee == id);
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (employee == null) return null;
 
             return new EmployeesDTO
             {
-                IdEmployee = employee.IdEmployee,
+                IdEmployee = employee.Id,
                 Name = employee.Name,
                 Telephone = employee.Telephone,
                 Email = employee.Email,
-                IdRole = employee.IdRole,
-                NameRole = employee.Role.NameRole
+                IdRole = employee.RoleId,
+                NameRole = employee.Role.Name
             };
         }
 
         public async Task<bool> CrearAsync(CreateEmployeeDTO dto)
         {
-            var employee = new Employees
+            var employee = new Employee
             {
-                IdEmployee = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Telephone = dto.Telephone,
                 Email = dto.Email,
-                IdRole = dto.IdRole
+                RoleId = dto.IdRole
             };
 
             _context.Employees.Add(employee);
@@ -72,7 +72,7 @@ namespace Restaurante.Web.Services.Implementations
             employee.Name = dto.Name;
             employee.Telephone = dto.Telephone;
             employee.Email = dto.Email;
-            employee.IdRole = dto.IdRole;
+            employee.RoleId = dto.IdRole;
 
             _context.Employees.Update(employee);
             return await _context.SaveChangesAsync() > 0;
@@ -92,11 +92,11 @@ namespace Restaurante.Web.Services.Implementations
         public async Task<IEnumerable<SelectListItem>> ObtenerRolesAsync()
         {
             return await _context.Roles
-                .OrderBy(r => r.NameRole)
+                .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
-                    Value = r.IdRole.ToString(),
-                    Text = r.NameRole
+                    Value = r.Id.ToString(),
+                    Text = r.Name
                 }).ToListAsync();
         }
     }

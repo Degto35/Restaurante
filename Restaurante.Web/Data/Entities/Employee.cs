@@ -1,12 +1,14 @@
-﻿using Restaurante.Web.Data.Entities;          // <- NUEVO
+﻿using Restaurante.Web.Data.Abstractions;
+using Restaurante.Web.Data.Entities;      
 using System.ComponentModel.DataAnnotations;
 
-namespace Restaurante.Web.Entities
+
+namespace Restaurante.Web.Data.Entities
 {
-    public class Employees
+    public class Employee : IId
     {
         [Key]
-        public Guid IdEmployee { get; set; }
+        public Guid Id { get; set; }
 
         [MaxLength(32, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido")]
@@ -21,10 +23,10 @@ namespace Restaurante.Web.Entities
         [EmailAddress(ErrorMessage = "El campo {0} no tiene un formato válido")]
         public string? Email { get; set; }
 
-        public Guid IdRole { get; set; }
+        public Guid RoleId { get; set; }
 
         public Role Role { get; set; } = null!;
 
-        public ICollection<Order> Orders { get; set; } = new List<Order>();   // <- NUEVO
+        public ICollection<Order> Orders { get; set; } = new List<Order>();  
     }
 }

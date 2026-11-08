@@ -21,7 +21,7 @@ namespace Restaurante.Web.Services.Implementations
                 .OrderBy(t => t.Number)
                 .Select(t => new TableDTO
                 {
-                    IdTable = t.IdTable,
+                    IdTable = t.Id,
                     Number = t.Number,
                     Capacity = t.Capacity,
                     IsAvailable = t.IsAvailable
@@ -36,7 +36,7 @@ namespace Restaurante.Web.Services.Implementations
 
             return new TableDTO
             {
-                IdTable = table.IdTable,
+                IdTable = table.Id,
                 Number = table.Number,
                 Capacity = table.Capacity,
                 IsAvailable = table.IsAvailable
@@ -47,7 +47,7 @@ namespace Restaurante.Web.Services.Implementations
         {
             var table = new DiningTable
             {
-                IdTable = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Number = dto.Number,
                 Capacity = dto.Capacity,
                 IsAvailable = true

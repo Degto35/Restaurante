@@ -1,9 +1,8 @@
 ﻿using global::Restaurante.Web.Data;
 using global::Restaurante.Web.DTOs.Role;
-using global::Restaurante.Web.Entities;
 using global::Restaurante.Web.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
-
+using Restaurante.Web.Data.Entities;
 
 namespace Restaurante.Web.Services.Implementations
 {
@@ -19,7 +18,7 @@ namespace Restaurante.Web.Services.Implementations
         public async Task<List<RoleDTO>> ObtenerTodosAsync()
         {
             return await _context.Roles
-                .Select(r => new RoleDTO { IdRole = r.IdRole, NameRole = r.NameRole })
+                .Select(r => new RoleDTO { IdRole = r.Id, NameRole = r.Name })
                 .ToListAsync();
         }
 
@@ -28,15 +27,15 @@ namespace Restaurante.Web.Services.Implementations
             var rol = await _context.Roles.FindAsync(id);
             if (rol == null) return null;
 
-            return new RoleDTO { IdRole = rol.IdRole, NameRole = rol.NameRole };
+            return new RoleDTO { IdRole = rol.Id, NameRole = rol.Name };
         }
 
         public async Task<bool> CrearAsync(CreateRoleDTO dto)
         {
             var rol = new Role
             {
-                IdRole = Guid.NewGuid(),
-                NameRole = dto.NameRole
+                Id = Guid.NewGuid(),
+                Name = dto.NameRole
             };
 
             _context.Roles.Add(rol);
@@ -48,7 +47,7 @@ namespace Restaurante.Web.Services.Implementations
             var role = await _context.Roles.FindAsync(dto.IdRole);
             if (role == null) return false;
 
-            role.NameRole = dto.NameRole;
+            role.Name = dto.NameRole;
 
             _context.Roles.Update(role);
             return await _context.SaveChangesAsync() > 0;
@@ -59,7 +58,7 @@ namespace Restaurante.Web.Services.Implementations
             var role = await _context.Roles.FindAsync(id);
             if (role == null) return false;
 
-            var tieneEmpleados = await _context.Employees.AnyAsync(e => e.IdRole == id);
+            var tieneEmpleados = await _context.Employees.AnyAsync(e => e.RoleId == id);
             if (tieneEmpleados) return false;
 
             _context.Roles.Remove(role);

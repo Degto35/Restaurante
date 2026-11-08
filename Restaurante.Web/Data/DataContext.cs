@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data.Entities;
-using Restaurante.Web.Entities;
 
 namespace Restaurante.Web.Data
 {
@@ -11,10 +10,10 @@ namespace Restaurante.Web.Data
         {
         }
 
-        public DbSet<Categories> Categories { get; set; }
-        public DbSet<Dishes> Dishes { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Dish> Dishes { get; set; }
         public DbSet<Role> Roles { get; set; }                  
-        public DbSet<Employees> Employees { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<DiningTable> DiningTables { get; set; }    
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
@@ -24,17 +23,17 @@ namespace Restaurante.Web.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Dishes>()
+            modelBuilder.Entity<Dish>()
                 .HasOne(d => d.Category)
                 .WithMany(c => c.Dishes)
-                .HasForeignKey(d => d.IdCategories)
+                .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
       
-            modelBuilder.Entity<Employees>()
+            modelBuilder.Entity<Employee>()
                 .HasOne(e => e.Role)
                 .WithMany(r => r.Employees)
-                .HasForeignKey(e => e.IdRole)
+                .HasForeignKey(e => e.RoleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()

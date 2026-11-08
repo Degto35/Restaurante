@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data;
 using Restaurante.Web.DTOs.Categories;
-using Restaurante.Web.Entities;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.Services.Abstractions;
 
@@ -21,10 +20,10 @@ namespace Restaurante.Web.Services.Implementations
             return await _context.Categories
                 .Select(c => new CategoryDTO
                 {
-                    IdCategories = c.IdCategories,
+                    IdCategories = c.Id,
                     Name = c.Name,
                     Description = c.Description,
-                    State= c.State
+                    State= c.IsActive
                 }).ToListAsync();
         }
 
@@ -35,21 +34,21 @@ namespace Restaurante.Web.Services.Implementations
 
             return new CategoryDTO
             {
-                IdCategories = category.IdCategories,
+                IdCategories = category.Id,
                 Name = category.Name,
                 Description = category.Description,
-                State= category.State
+                State= category.IsActive
             };
         }
 
         public async Task<bool> CrearAsync(CreateCategoryDTO dto)
         {
 
-            var categories = new Categories
+            var categories = new Category
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                State = true
+                IsActive = true
             };
 
             _context.Categories.Add(categories);
@@ -63,7 +62,7 @@ namespace Restaurante.Web.Services.Implementations
 
             category.Name = dto.Name;
             category.Description = dto.Description;
-            category.State = dto.State;
+            category.IsActive = dto.State;
 
             _context.Categories.Update(category);
             return await _context.SaveChangesAsync() > 0;
@@ -73,7 +72,7 @@ namespace Restaurante.Web.Services.Implementations
         {
             var category = await _context.Categories.FindAsync(id);
             if (category == null) return false;
-            var hasDishes = await _context.Dishes.AnyAsync(p => p.IdCategories == id);
+            var hasDishes = await _context.Dishes.AnyAsync(p => p.CategoryId == id);
             if (hasDishes) return false;
 
             _context.Categories.Remove(category);

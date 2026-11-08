@@ -1,12 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Restaurante.Web.Data.Abstractions;
 using Restaurante.Web.Data.Entities;
+namespace Restaurante.Web.Data.Entities
 
-namespace Restaurante.Web.Entities
 {
-    public class Categories
+    public class Category : IId
     {
         [Key]
-        public Guid IdCategories { get; set; }
+        public Guid Id { get; set; }
 
         [MaxLength(50, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido")]
@@ -15,8 +16,8 @@ namespace Restaurante.Web.Entities
         [MaxLength(200, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         public string? Description { get; set; }
 
-        public bool State { get; set; } = true;
+        public bool IsActive { get; set; } = true;
 
-        public ICollection<Dishes> Dishes { get; set; } = new List<Dishes>();
+        public ICollection<Dish> Dishes { get; set; } = new List<Dish>();
     }
 }

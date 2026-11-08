@@ -99,7 +99,7 @@ namespace Restaurante.Web.Services.Implementations
                     return Response<OrderDTO>.Failure("La mesa seleccionada no está disponible.");
                 }
 
-                bool employeeExists = await _context.Employees.AnyAsync(e => e.IdEmployee == dto.EmployeeId);
+                bool employeeExists = await _context.Employees.AnyAsync(e => e.Id == dto.EmployeeId);
 
                 if (!employeeExists)
                 {
@@ -192,7 +192,7 @@ namespace Restaurante.Web.Services.Implementations
 
                 var dish = await _context.Dishes.FindAsync(dto.DishId);
 
-                if (dish is null || !dish.State)
+                if (dish is null || !dish.IsActive)
                 {
                     return Response.Failure("El plato seleccionado no está disponible.");
                 }

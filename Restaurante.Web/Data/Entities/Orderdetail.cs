@@ -1,5 +1,4 @@
 ﻿using Restaurante.Web.Data.Abstractions;
-using Restaurante.Web.Entities;            // temporal: Dishes todavía vive ahí
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,7 +13,7 @@ namespace Restaurante.Web.Data.Entities
         public Order Order { get; set; } = null!;
 
         public Guid DishId { get; set; }
-        public Dishes Dish { get; set; } = null!;           // pasará a "Dish" con F2
+        public Dish Dish { get; set; } = null!;           // pasará a "Dish" con F2
 
         [Display(Name = "Cantidad")]
         [Range(1, 100, ErrorMessage = "El campo {0} debe estar entre {1} y {2}")]

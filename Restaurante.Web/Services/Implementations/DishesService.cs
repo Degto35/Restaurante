@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data;
 using Restaurante.Web.DTOs.Dishes;
-using Restaurante.Web.Entities;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.Services.Abstractions;
 
@@ -22,12 +21,12 @@ namespace Restaurante.Web.Services.Implementations
                 .Include(d => d.Category) // ¡IMPORTANTE! Trae los datos de la categoría
                 .Select(d => new DishDTO
                 {
-                    IdDish = d.IdDish,
+                    IdDish = d.Id,
                     Name = d.Name,
                     Description = d.Description,
                     Price = d.Price,
-                    State = d.State,
-                    IdCategories = d.IdCategories,
+                    State = d.IsActive,
+                    IdCategories = d.CategoryId,
                     CategoryName = d.Category.Name // Se llena gracias al Include
                 }).ToListAsync();
         }
@@ -36,31 +35,31 @@ namespace Restaurante.Web.Services.Implementations
         {
             var dishes = await _context.Dishes
                 .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.IdDish == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (dishes == null) return null;
 
             return new DishDTO
             {
-                IdDish = dishes.IdDish,
+                IdDish = dishes.Id,
                 Name = dishes.Name,
                 Description = dishes.Description,
                 Price = dishes.Price,
-                State = dishes.State,
-                IdCategories = dishes.IdCategories,
+                State = dishes.IsActive,
+                IdCategories = dishes.CategoryId,
                 CategoryName = dishes.Category.Name
             };
         }
 
         public async Task<bool> CrearAsync(CreateDishDTO dto)
         {
-            var dishes = new Dishes
+            var dishes = new Dish
             {
                 Name = dto.Name,
                 Description = dto.Description,
                 Price = dto.Price,
-                IdCategories = dto.IdCategories,
-                State = true
+                CategoryId= dto.IdCategories,
+                IsActive = true
             };
 
             _context.Dishes.Add(dishes);
@@ -75,8 +74,8 @@ namespace Restaurante.Web.Services.Implementations
             dishes.Name = dto.Name;
             dishes.Description = dto.Description;
             dishes.Price = dto.Price;
-            dishes.IdCategories = dto.IdCategories;
-            dishes.State = dto.State;
+            dishes.CategoryId = dto.IdCategories;
+            dishes.IsActive = dto.State;
 
             _context.Dishes.Update(dishes);
             return await _context.SaveChangesAsync() > 0;

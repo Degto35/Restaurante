@@ -1,11 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Restaurante.Web.Data.Abstractions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Restaurante.Web.Data.Entities
 {
-    public class DiningTable
+    public class DiningTable : IId
     {
         [Key]
-        public Guid IdTable { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "El número de mesa es obligatorio.")]
         [Range(1, 1000, ErrorMessage = "El número debe ser mayor a 0.")]
