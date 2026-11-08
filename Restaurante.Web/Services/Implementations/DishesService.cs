@@ -18,7 +18,7 @@ namespace Restaurante.Web.Services.Implementations
         public async Task<List<DishDTO>> ObtenerTodosAsync()
         {
             return await _context.Dishes
-                .Include(d => d.Category) // ¡IMPORTANTE! Trae los datos de la categoría
+                .Include(d => d.Category) 
                 .Select(d => new DishDTO
                 {
                     IdDish = d.Id,
@@ -27,7 +27,7 @@ namespace Restaurante.Web.Services.Implementations
                     Price = d.Price,
                     State = d.IsActive,
                     IdCategories = d.CategoryId,
-                    CategoryName = d.Category.Name // Se llena gracias al Include
+                    CategoryName = d.Category.Name 
                 }).ToListAsync();
         }
 
