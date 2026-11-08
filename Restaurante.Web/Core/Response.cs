@@ -23,7 +23,11 @@
         public static Response<T> Success(T result, string message = "Tarea realizada con éxito")
             => new() { IsSuccess = true, Message = message, Result = result };
 
-        public static new Response<T> Failure(string message, List<string>? errors = null)
+        public static new Response<T> Success(string message = "Tarea realizada con éxito")
+            => new() { IsSuccess = true, Message = message };
+
+
+        public static new Response<T> Failure(string message = "Ha ocurrido un error", List<string>? errors = null)
             => new() { IsSuccess = false, Message = message, Errors = errors };
 
         public static new Response<T> Failure(Exception ex, string message = "Ha ocurrido un error al procesar la solicitud")
