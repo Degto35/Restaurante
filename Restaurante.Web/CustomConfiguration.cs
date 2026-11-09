@@ -2,6 +2,8 @@
 using Restaurante.Web.Data;
 using Restaurante.Web.Services.Abstractions;
 using Restaurante.Web.Services.Implementations;
+using Restaurante.Web.Helpers.Abstractions;
+using Restaurante.Web.Helpers.Implementations;
 
 namespace Restaurante.Web
 {
@@ -32,6 +34,7 @@ namespace Restaurante.Web
             builder.Services.AddScoped<IEmployeesService, EmployeesService>();
             builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
+            builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();
         }
     }
 }

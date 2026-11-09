@@ -5,6 +5,7 @@ using Restaurante.Web.DTOs.DiningTables;
 using Restaurante.Web.DTOs.Orders;
 using Restaurante.Web.Services.Abstractions;
 using Restaurante.Web.Services.Implementations;
+using Restaurante.Web.Helpers.Abstractions;
 
 namespace Restaurante.Web.Controllers
 {
@@ -12,18 +13,18 @@ namespace Restaurante.Web.Controllers
     {
         private readonly IOrdersService _ordersService;
         private readonly IDiningTablesService _diningTablesService;
-        private readonly IEmployeesService _employeesService;
+        private readonly ISelectListHelper _selectListHelper;
         private readonly IDishesService _dishesService;
 
         public OrdersController(
             IOrdersService ordersService,
             IDiningTablesService diningTablesService,
-            IEmployeesService employeesService,
+            ISelectListHelper selectListHelper,
             IDishesService dishesService)
         {
             _ordersService = ordersService;
             _diningTablesService = diningTablesService;
-            _employeesService = employeesService;
+            _selectListHelper = selectListHelper;
             _dishesService = dishesService;
         }
 
@@ -132,7 +133,6 @@ namespace Restaurante.Web.Controllers
         private async Task LoadCreateListsAsync()
         {
             var tablesResponse = await _diningTablesService.GetAllAsync();
-            var employees = await _employeesService.ObtenerTodosAsync();
 
             ViewBag.Tables = (tablesResponse.Result ?? new List<DiningTableDTO>())
                 .Where(t => t.IsAvailable)
@@ -143,13 +143,7 @@ namespace Restaurante.Web.Controllers
                 })
                 .ToList();
 
-            ViewBag.Employees = employees
-                .Select(e => new SelectListItem
-                {
-                    Value = e.IdEmployee.ToString(),
-                    Text = e.Name
-                })
-                .ToList();
+            ViewBag.Employees = await _selectListHelper.GetEmployeesSelectListAsync();
         }
 
 
