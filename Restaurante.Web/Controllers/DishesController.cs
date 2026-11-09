@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Restaurante.Web.DTOs.Categories;
 using Restaurante.Web.DTOs.Dishes;
 using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.DTOs.Categories;
 
 namespace Restaurante.Web.Controllers
 {
@@ -19,6 +21,13 @@ namespace Restaurante.Web.Controllers
         {
             var dishes = await _DishesService.ObtenerTodosAsync();
             return View(dishes);
+        }
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var dish = await _DishesService.ObtenerPorIdAsync(id);
+            if (dish == null) return NotFound();
+
+            return View(dish);
         }
         public async Task<IActionResult> Create()
         {
@@ -102,11 +111,17 @@ namespace Restaurante.Web.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-        private async Task CargarCategoriasEnViewBag(Guid
-            ? idCategoriaSeleccionada = null)
+        private async Task CargarCategoriasEnViewBag(Guid? idCategoriaSeleccionada = null)
         {
-            var categories = await _CategoriesService.ObtenerTodasAsync();
-            ViewBag.Categorias = new SelectList(categories, "IdCategories", "Name", idCategoriaSeleccionada);
+            var response = await _CategoriesService.GetAllAsync();
+
+            
+            var categories = (response.Result ?? new List<CategoryDTO>())
+                .Where(c => c.IsActive || c.Id == idCategoriaSeleccionada)
+                .ToList();
+
+            ViewBag.Categorias = new SelectList(categories, "Id", "Name", idCategoriaSeleccionada);
         }
+
     }
 }
