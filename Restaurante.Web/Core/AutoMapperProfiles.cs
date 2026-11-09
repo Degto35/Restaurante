@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.DTOs.Categories;
-using Restaurante.Web.DTOs.Roles;
 using Restaurante.Web.DTOs.DiningTables;
+using Restaurante.Web.DTOs.Dishes;
 using Restaurante.Web.DTOs.Employees;
+using Restaurante.Web.DTOs.Roles;
 
 namespace Restaurante.Web.Core
 {
@@ -22,13 +23,13 @@ namespace Restaurante.Web.Core
             CreateMap<DiningTable, UpdateDiningTableDTO>().ReverseMap();
             CreateMap<Employee, EmployeeDTO>();
 
-            CreateMap<Employee, CreateEmployeeDTO>()
-                .ForMember(d => d.Roles, o => o.Ignore())
-                .ReverseMap();
+            CreateMap<Employee, CreateEmployeeDTO>().ForMember(d => d.Roles, o => o.Ignore()).ReverseMap();
 
-            CreateMap<Employee, UpdateEmployeeDTO>()
-                .ForMember(d => d.Roles, o => o.Ignore())
-                .ReverseMap();
+            CreateMap<Employee, UpdateEmployeeDTO>().ForMember(d => d.Roles, o => o.Ignore()).ReverseMap();
+
+            CreateMap<Dish, DishDTO>();
+            CreateMap<Dish, CreateDishDTO>().ForMember(d => d.Categories, o => o.Ignore()).ReverseMap();
+            CreateMap<Dish, UpdateDishDTO>().ForMember(d => d.Categories, o => o.Ignore()).ReverseMap();
         }
     }
 }

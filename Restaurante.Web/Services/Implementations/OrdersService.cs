@@ -190,9 +190,9 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("No se pueden agregar platos a un pedido cerrado.");
                 }
 
-                var dish = await _context.Dishes.FindAsync(dto.DishId);
+                var dish = await _context.Dishes.Include(d => d.Category).FirstOrDefaultAsync(d => d.Id == dto.DishId);
 
-                if (dish is null || !dish.IsActive)
+                if (dish is null || !dish.IsActive || !dish.Category.IsActive)
                 {
                     return Response.Failure("El plato seleccionado no está disponible.");
                 }

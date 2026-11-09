@@ -12,20 +12,12 @@ namespace Restaurante.Web.Controllers
     public class OrdersController : Controller
     {
         private readonly IOrdersService _ordersService;
-        private readonly IDiningTablesService _diningTablesService;
         private readonly ISelectListHelper _selectListHelper;
-        private readonly IDishesService _dishesService;
 
-        public OrdersController(
-            IOrdersService ordersService,
-            IDiningTablesService diningTablesService,
-            ISelectListHelper selectListHelper,
-            IDishesService dishesService)
+        public OrdersController(IOrdersService ordersService, ISelectListHelper selectListHelper)
         {
             _ordersService = ordersService;
-            _diningTablesService = diningTablesService;
             _selectListHelper = selectListHelper;
-            _dishesService = dishesService;
         }
 
         public async Task<IActionResult> Index()
@@ -132,33 +124,13 @@ namespace Restaurante.Web.Controllers
 
         private async Task LoadCreateListsAsync()
         {
-            var tablesResponse = await _diningTablesService.GetAllAsync();
-
-            ViewBag.Tables = (tablesResponse.Result ?? new List<DiningTableDTO>())
-                .Where(t => t.IsAvailable)
-                .Select(t => new SelectListItem
-                {
-                    Value = t.Id.ToString(),
-                    Text = $"Mesa {t.Number} ({t.Capacity} personas)"
-                })
-                .ToList();
-
+            ViewBag.Tables = await _selectListHelper.GetAvailableTablesSelectListAsync();
             ViewBag.Employees = await _selectListHelper.GetEmployeesSelectListAsync();
         }
 
-
         private async Task LoadDishesAsync()
         {
-            var dishes = await _dishesService.ObtenerTodosAsync();
-
-            ViewBag.Dishes = dishes
-                .Where(d => d.State)
-                .Select(d => new SelectListItem
-                {
-                    Value = d.IdDish.ToString(),
-                    Text = $"{d.Name} - {d.Price:C}"
-                })
-                .ToList();
+            ViewBag.Dishes = await _selectListHelper.GetAvailableDishesSelectListAsync();
         }
     }
 }

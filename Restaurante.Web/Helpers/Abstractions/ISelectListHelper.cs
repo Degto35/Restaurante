@@ -6,5 +6,8 @@ namespace Restaurante.Web.Helpers.Abstractions
     {
         Task<List<SelectListItem>> GetRolesSelectListAsync();
         Task<List<SelectListItem>> GetEmployeesSelectListAsync();
+        Task<List<SelectListItem>> GetCategoriesSelectListAsync(Guid? currentCategoryId = null);
+        Task<List<SelectListItem>> GetAvailableDishesSelectListAsync();
+        Task<List<SelectListItem>> GetAvailableTablesSelectListAsync();
     }
 }
