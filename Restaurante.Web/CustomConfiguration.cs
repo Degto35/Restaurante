@@ -30,7 +30,7 @@ namespace Restaurante.Web
             builder.Services.AddScoped<IDishesService, DishesService>();
             builder.Services.AddScoped<IRolesService, RolesService>();
             builder.Services.AddScoped<IEmployeesService, EmployeesService>();
-            builder.Services.AddScoped<ITablesService, TablesService>();
+            builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
         }
     }

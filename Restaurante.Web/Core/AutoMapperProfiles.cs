@@ -2,6 +2,7 @@
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.DTOs.Categories;
 using Restaurante.Web.DTOs.Roles;
+using Restaurante.Web.DTOs.DiningTables;
 
 namespace Restaurante.Web.Core
 {
@@ -15,6 +16,9 @@ namespace Restaurante.Web.Core
             CreateMap<Role, RoleDTO>().ReverseMap();
             CreateMap<Role, CreateRoleDTO>().ReverseMap();
             CreateMap<Role, UpdateRoleDTO>().ReverseMap();
+            CreateMap<DiningTable, DiningTableDTO>().ReverseMap();
+            CreateMap<DiningTable, CreateDiningTableDTO>().ReverseMap();
+            CreateMap<DiningTable, UpdateDiningTableDTO>().ReverseMap();
         }
     }
 }

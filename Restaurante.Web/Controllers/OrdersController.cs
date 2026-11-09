@@ -1,26 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Restaurante.Web.Core;
+using Restaurante.Web.DTOs.DiningTables;
 using Restaurante.Web.DTOs.Orders;
 using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Services.Implementations;
 
 namespace Restaurante.Web.Controllers
 {
     public class OrdersController : Controller
     {
         private readonly IOrdersService _ordersService;
-        private readonly ITablesService _tablesService;
+        private readonly IDiningTablesService _diningTablesService;
         private readonly IEmployeesService _employeesService;
         private readonly IDishesService _dishesService;
 
         public OrdersController(
             IOrdersService ordersService,
-            ITablesService tablesService,
+            IDiningTablesService diningTablesService,
             IEmployeesService employeesService,
             IDishesService dishesService)
         {
             _ordersService = ordersService;
-            _tablesService = tablesService;
+            _diningTablesService = diningTablesService;
             _employeesService = employeesService;
             _dishesService = dishesService;
         }
@@ -129,14 +131,14 @@ namespace Restaurante.Web.Controllers
 
         private async Task LoadCreateListsAsync()
         {
-            var tables = await _tablesService.ObtenerTodasAsync();
+            var tablesResponse = await _diningTablesService.GetAllAsync();
             var employees = await _employeesService.ObtenerTodosAsync();
 
-            ViewBag.Tables = tables
+            ViewBag.Tables = (tablesResponse.Result ?? new List<DiningTableDTO>())
                 .Where(t => t.IsAvailable)
                 .Select(t => new SelectListItem
                 {
-                    Value = t.IdTable.ToString(),
+                    Value = t.Id.ToString(),
                     Text = $"Mesa {t.Number} ({t.Capacity} personas)"
                 })
                 .ToList();
@@ -150,7 +152,7 @@ namespace Restaurante.Web.Controllers
                 .ToList();
         }
 
-        
+
         private async Task LoadDishesAsync()
         {
             var dishes = await _dishesService.ObtenerTodosAsync();
