@@ -5,6 +5,8 @@ using Restaurante.Web.DTOs.DiningTables;
 using Restaurante.Web.DTOs.Dishes;
 using Restaurante.Web.DTOs.Employees;
 using Restaurante.Web.DTOs.Roles;
+using Restaurante.Web.Data.Enums;
+using Restaurante.Web.DTOs.Orders;
 
 namespace Restaurante.Web.Core
 {
@@ -30,6 +32,14 @@ namespace Restaurante.Web.Core
             CreateMap<Dish, DishDTO>();
             CreateMap<Dish, CreateDishDTO>().ForMember(d => d.Categories, o => o.Ignore()).ReverseMap();
             CreateMap<Dish, UpdateDishDTO>().ForMember(d => d.Categories, o => o.Ignore()).ReverseMap();
+
+            CreateMap<OrderDetail, OrderDetailDTO>();
+
+            CreateMap<Order, OrderDTO>()
+                .ForMember(d => d.TableNumber, o => o.MapFrom(s => s.DiningTable.Number))
+                .ForMember(d => d.EmployeeName, o => o.MapFrom(s => s.Employee.Name))
+                .ForMember(d => d.PaymentMethod, o => o.MapFrom(s => s.Bill != null ? (PaymentMethod?)s.Bill.PaymentMethod : null))
+                .ForMember(d => d.PaidAt, o => o.MapFrom(s => s.Bill != null ? (DateTime?)s.Bill.PaidAt : null));
         }
     }
 }

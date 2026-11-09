@@ -6,6 +6,7 @@ using Restaurante.Web.DTOs.Orders;
 using Restaurante.Web.Services.Abstractions;
 using Restaurante.Web.Services.Implementations;
 using Restaurante.Web.Helpers.Abstractions;
+using Restaurante.Web.Core.Pagination;
 
 namespace Restaurante.Web.Controllers
 {
@@ -20,14 +21,15 @@ namespace Restaurante.Web.Controllers
             _selectListHelper = selectListHelper;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            Response<List<OrderDTO>> response = await _ordersService.GetAllAsync();
+            Response<PaginationResponse<OrderDTO>> response = await _ordersService.GetPaginationAsync(request);
 
             if (!response.IsSuccess)
             {
                 TempData["Error"] = response.Message;
-                return View(new List<OrderDTO>());
+                return RedirectToAction("Index", "Home");
             }
 
             return View(response.Result!);
@@ -35,7 +37,7 @@ namespace Restaurante.Web.Controllers
 
         public async Task<IActionResult> Details(Guid id)
         {
-            Response<OrderDTO> response = await _ordersService.GetByIdAsync(id);
+            Response<OrderDTO> response = await _ordersService.GetOneAsync(id);
 
             if (!response.IsSuccess)
             {

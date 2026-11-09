@@ -1,88 +1,58 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.Data;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.Data.Enums;
 using Restaurante.Web.DTOs.Orders;
 using Restaurante.Web.Services.Abstractions;
-using System.Linq.Expressions;
 
 namespace Restaurante.Web.Services.Implementations
 {
-    public class OrdersService : IOrdersService
+    public class OrdersService : CustomQueryableOperationsService, IOrdersService
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public OrdersService(DataContext context)
+        public OrdersService(DataContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        
-        private static readonly Expression<Func<Order, OrderDTO>> ToDto = o => new OrderDTO
-        {
-            Id = o.Id,
-            Date = o.Date,
-            Status = o.Status,
-            PaymentMethod = o.Bill != null ? (PaymentMethod?)o.Bill.PaymentMethod : null,
-            PaidAt = o.Bill != null ? (DateTime?)o.Bill.PaidAt : null,
-            DiningTableId = o.DiningTableId,
-            TableNumber = o.DiningTable.Number,
-            EmployeeId = o.EmployeeId,
-            EmployeeName = o.Employee.Name,
-            OrderDetails = o.OrderDetails.Select(d => new OrderDetailDTO
-            {
-                Id = d.Id,
-                DishId = d.DishId,
-                DishName = d.Dish.Name,
-                Quantity = d.Quantity,
-                UnitPrice = d.UnitPrice
-            }).ToList()
-        };
+        private IQueryable<Order> OrdersWithRelations()
+            => _context.Orders
+                .Include(o => o.DiningTable)
+                .Include(o => o.Employee)
+                .Include(o => o.Bill)
+                .Include(o => o.OrderDetails).ThenInclude(d => d.Dish);
 
-      
+
         private static bool IsClosed(OrderStatus status)
             => status == OrderStatus.Paid || status == OrderStatus.Cancelled;
 
-        public async Task<Response<List<OrderDTO>>> GetAllAsync()
+        public async Task<Response<PaginationResponse<OrderDTO>>> GetPaginationAsync(PaginationRequest request)
         {
-            try
-            {
-                List<OrderDTO> orders = await _context.Orders
-                    .OrderByDescending(o => o.Date)
-                    .Select(ToDto)
-                    .ToListAsync();
+            IQueryable<Order> query = OrdersWithRelations();
 
-                return Response<List<OrderDTO>>.Success(orders);
-            }
-            catch (Exception ex)
+            if (!string.IsNullOrWhiteSpace(request.Filter))
             {
-                return Response<List<OrderDTO>>.Failure(ex);
+                string filter = request.Filter.ToLower();
+
+                query = query.Where(o => o.Employee.Name.ToLower().Contains(filter)
+                                      || o.DiningTable.Number.ToString().Contains(filter));
             }
+
+            query = query.OrderByDescending(o => o.Date);
+
+            return await GetPagedListAsync<OrderDTO, Order>(request, query);
         }
 
-        public async Task<Response<OrderDTO>> GetByIdAsync(Guid id)
+        public async Task<Response<OrderDTO>> GetOneAsync(Guid id)
         {
-            try
-            {
-                OrderDTO? order = await _context.Orders
-                    .Where(o => o.Id == id)
-                    .Select(ToDto)
-                    .FirstOrDefaultAsync();
-
-                if (order is null)
-                {
-                    return Response<OrderDTO>.Failure("El pedido no existe.");
-                }
-
-                return Response<OrderDTO>.Success(order);
-            }
-            catch (Exception ex)
-            {
-                return Response<OrderDTO>.Failure(ex);
-            }
+            return await GetOneAsync<OrderDTO, Order>(id, OrdersWithRelations());
         }
-
         public async Task<Response<OrderDTO>> CreateAsync(CreateOrderDTO dto)
         {
             try
@@ -119,12 +89,9 @@ namespace Restaurante.Web.Services.Implementations
 
                 await _context.SaveChangesAsync();
 
-                OrderDTO created = await _context.Orders
-                    .Where(o => o.Id == order.Id)
-                    .Select(ToDto)
-                    .FirstAsync();
+                Order created = await OrdersWithRelations().FirstAsync(o => o.Id == order.Id);
 
-                return Response<OrderDTO>.Success(created, "Pedido creado correctamente.");
+                return Response<OrderDTO>.Success(_mapper.Map<OrderDTO>(created), "Pedido creado correctamente.");
             }
             catch (Exception ex)
             {
