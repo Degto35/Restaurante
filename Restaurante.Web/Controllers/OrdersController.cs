@@ -45,14 +45,17 @@ namespace Restaurante.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await LoadDishesAsync();
-            return View(response.Result!);
+            OrderDTO order = response.Result!;
+            order.Dishes = await _selectListHelper.GetAvailableDishesSelectListAsync();
+            return View(order);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            await LoadCreateListsAsync();
-            return View(new CreateOrderDTO());
+            CreateOrderDTO dto = new CreateOrderDTO();
+            await FillListsAsync(dto);
+            return View(dto);
         }
 
         [HttpPost]
@@ -61,7 +64,7 @@ namespace Restaurante.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await LoadCreateListsAsync();
+                await FillListsAsync(dto);
                 return View(dto);
             }
 
@@ -70,7 +73,7 @@ namespace Restaurante.Web.Controllers
             if (!response.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear el pedido.");
-                await LoadCreateListsAsync();
+                await FillListsAsync(dto);
                 return View(dto);
             }
 
@@ -124,15 +127,10 @@ namespace Restaurante.Web.Controllers
             return RedirectToAction(nameof(Details), new { id = dto.OrderId });
         }
 
-        private async Task LoadCreateListsAsync()
+        private async Task FillListsAsync(CreateOrderDTO dto)
         {
-            ViewBag.Tables = await _selectListHelper.GetAvailableTablesSelectListAsync();
-            ViewBag.Employees = await _selectListHelper.GetEmployeesSelectListAsync();
-        }
-
-        private async Task LoadDishesAsync()
-        {
-            ViewBag.Dishes = await _selectListHelper.GetAvailableDishesSelectListAsync();
+            dto.Tables = await _selectListHelper.GetAvailableTablesSelectListAsync();
+            dto.Employees = await _selectListHelper.GetEmployeesSelectListAsync();
         }
     }
 }

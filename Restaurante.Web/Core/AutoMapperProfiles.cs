@@ -36,6 +36,7 @@ namespace Restaurante.Web.Core
             CreateMap<OrderDetail, OrderDetailDTO>();
 
             CreateMap<Order, OrderDTO>()
+                .ForMember(d => d.Dishes, o => o.Ignore())
                 .ForMember(d => d.TableNumber, o => o.MapFrom(s => s.DiningTable.Number))
                 .ForMember(d => d.EmployeeName, o => o.MapFrom(s => s.Employee.Name))
                 .ForMember(d => d.PaymentMethod, o => o.MapFrom(s => s.Bill != null ? (PaymentMethod?)s.Bill.PaymentMethod : null))

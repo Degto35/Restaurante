@@ -1,5 +1,5 @@
 ﻿using Restaurante.Web.Data.Enums;
-
+using Microsoft.AspNetCore.Mvc.Rendering;
 namespace Restaurante.Web.DTOs.Orders
 {
     public class OrderDTO
@@ -21,5 +21,6 @@ namespace Restaurante.Web.DTOs.Orders
         public decimal Total => OrderDetails.Sum(d => d.Subtotal);
 
         public bool IsClosed => Status == OrderStatus.Paid || Status == OrderStatus.Cancelled;
+        public IEnumerable<SelectListItem>? Dishes { get; set; }
     }
 }

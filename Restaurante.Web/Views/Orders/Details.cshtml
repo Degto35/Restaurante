@@ -16,20 +16,7 @@
 
 <h1>@ViewData["Title"]</h1>
 
-@if (TempData["Exito"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Exito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+<partial name="_Alerts" />
 
 <div class="card mb-4">
     <div class="card-body">
@@ -118,7 +105,7 @@ else
             <form asp-action="AddDetail" method="post" class="row g-2">
                 <input type="hidden" name="OrderId" value="@Model.Id" />
                 <div class="col-sm-7">
-                    <select name="DishId" class="form-select" asp-items="ViewBag.Dishes">
+                    <select name="DishId" class="form-select" asp-items="Model.Dishes">
                         <option value="">-- Seleccione un plato --</option>
                     </select>
                 </div>
