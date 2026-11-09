@@ -1,34 +1,16 @@
-using Microsoft.EntityFrameworkCore;
-using Restaurante.Web.Data;
-using Restaurante.Web.Services.Abstractions;
-using Restaurante.Web.Services.Implementations;
-var builder = WebApplication.CreateBuilder(args);
+using Restaurante.Web;
 
-// Add services to the container.
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection")));
-// NOTA: MyConnection" debe ser el nombre exacto que pusiste en appsettings.json
+builder.AddCustomConfiguration();
 
-// 2. Registrar tus Servicios (Interfaz -> Implementación)
-builder.Services.AddScoped<ICategoriesService, CategoriesService>();
-builder.Services.AddScoped<IDishesService, DishesService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IEmployeesService, EmployeesService>();
-builder.Services.AddScoped<ITablesService, TablesService>();
-builder.Services.AddScoped<IOrdersService, OrdersService>();
-builder.Services.AddAutoMapper(typeof(Program));
+WebApplication app = builder.Build();
 
-var app = builder.Build();
-
-
-
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -44,6 +26,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-
 app.Run();
-
