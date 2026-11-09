@@ -18,6 +18,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IEmployeesService, EmployeesService>();
 builder.Services.AddScoped<ITablesService, TablesService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
+builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
@@ -45,14 +46,4 @@ app.MapControllerRoute(
 
 
 app.Run();
-
-//estamos añadiendo texto
-//para probar que se guarden las modificaciones
-//gracias :D
-//gracias :D
-
-//hola mundo
-//hola
-//poloooo marcoooo!!
-//aqui estuve +
 
