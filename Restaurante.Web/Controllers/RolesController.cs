@@ -50,8 +50,10 @@ namespace Restaurante.Web.Controllers
         [CustomAuthorize("roles.create")]
         public async Task<IActionResult> Create()
         {
-            CreateRoleDTO dto = new CreateRoleDTO();
-            await FillPermissionsAsync(dto);
+            CreateRoleDTO dto = new CreateRoleDTO
+            {
+                Permissions = await LoadPermissionsAsync([])
+            };
 
             return View(dto);
         }
@@ -63,7 +65,7 @@ namespace Restaurante.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                await FillPermissionsAsync(dto);
+                dto.Permissions = await LoadPermissionsAsync(dto.PermissionIds);
                 return View(dto);
             }
 
@@ -72,7 +74,7 @@ namespace Restaurante.Web.Controllers
             if (!response.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear el rol.");
-                await FillPermissionsAsync(dto);
+                dto.Permissions = await LoadPermissionsAsync(dto.PermissionIds);
                 return View(dto);
             }
 
@@ -92,10 +94,18 @@ namespace Restaurante.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+          
+            if (response.Result!.Name == Env.SUPER_ADMIN_ROLE_NAME)
+            {
+                TempData["Error"] = "El rol de administrador no se puede modificar.";
+                return RedirectToAction(nameof(Index));
+            }
+
             UpdateRoleDTO dto = new UpdateRoleDTO
             {
-                Id = response.Result!.Id,
-                Name = response.Result.Name
+                Id = response.Result.Id,
+                Name = response.Result.Name,
+                Permissions = response.Result.Permissions
             };
 
             return View(dto);
@@ -108,6 +118,7 @@ namespace Restaurante.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
+                dto.Permissions = await LoadPermissionsAsync(dto.PermissionIds);
                 return View(dto);
             }
 
@@ -116,6 +127,7 @@ namespace Restaurante.Web.Controllers
             if (!response.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "Error al actualizar el rol.");
+                dto.Permissions = await LoadPermissionsAsync(dto.PermissionIds);
                 return View(dto);
             }
 
@@ -135,11 +147,11 @@ namespace Restaurante.Web.Controllers
         }
 
        
-        private async Task FillPermissionsAsync(CreateRoleDTO dto)
+        private async Task<List<PermissionForRoleDTO>> LoadPermissionsAsync(IEnumerable<Guid> selectedIds)
         {
-            Response<List<PermissionForRoleDTO>> response = await _rolesService.GetPermissionsAsync(dto.PermissionIds);
+            Response<List<PermissionForRoleDTO>> response = await _rolesService.GetPermissionsAsync(selectedIds);
 
-            dto.Permissions = response.IsSuccess ? response.Result! : [];
+            return response.IsSuccess ? response.Result! : [];
         }
     }
 }

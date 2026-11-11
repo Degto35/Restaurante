@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace Restaurante.Web.DTOs.Roles
 {
@@ -11,5 +12,12 @@ namespace Restaurante.Web.DTOs.Roles
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         [MaxLength(32, ErrorMessage = "El campo {0} debe tener como máximo {1} caracteres.")]
         public string Name { get; set; } = string.Empty;
+
+        
+        public List<Guid> PermissionIds { get; set; } = [];
+
+        
+        [ValidateNever]
+        public List<PermissionForRoleDTO> Permissions { get; set; } = [];
     }
 }

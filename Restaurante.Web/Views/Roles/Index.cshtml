@@ -1,4 +1,5 @@
-﻿@model Restaurante.Web.Core.Pagination.PaginationResponse<Restaurante.Web.DTOs.Roles.RoleDTO>
+﻿@using Restaurante.Web.Core
+@model Restaurante.Web.Core.Pagination.PaginationResponse<Restaurante.Web.DTOs.Roles.RoleDTO>
 
 @{
     ViewData["Title"] = "Lista de Roles";
@@ -8,9 +9,12 @@
 
 <partial name="_Alerts" />
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nuevo Rol</a>
-</p>
+@if (await AccountService.AccountUserIsAuthorizedAsync("roles.create"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Crear Nuevo Rol</a>
+    </p>
+}
 
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-auto">
@@ -38,6 +42,11 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            bool canUpdate = await AccountService.AccountUserIsAuthorizedAsync("roles.update");
+            bool canDelete = await AccountService.AccountUserIsAuthorizedAsync("roles.delete");
+        }
+
         @if (!Model.List.Any())
         {
             <tr>
@@ -47,16 +56,25 @@
 
         @foreach (var item in Model.List)
         {
+            bool isSuperAdmin = item.Name == Env.SUPER_ADMIN_ROLE_NAME;
+
             <tr>
                 <td>@item.Name</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                    @if (canUpdate && !isSuperAdmin)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                    }
+
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Detalles</a>
 
-                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
-                          onsubmit="return confirm('¿Seguro que desea eliminar este rol?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
+                    @if (canDelete && !isSuperAdmin)
+                    {
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('¿Seguro que desea eliminar este rol?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    }
                 </td>
             </tr>
         }

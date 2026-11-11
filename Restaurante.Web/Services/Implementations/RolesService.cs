@@ -98,19 +98,105 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<Response<UpdateRoleDTO>> UpdateAsync(UpdateRoleDTO dto)
         {
-            return await UpdateAsync<UpdateRoleDTO, Role>(dto, dto.Id);
+            try
+            {
+                Role? role = await _context.RestauranteRoles
+                    .Include(r => r.RolePermissions)
+                    .FirstOrDefaultAsync(r => r.Id == dto.Id);
+
+                if (role is null)
+                {
+                    return Response<UpdateRoleDTO>.Failure("No existe el rol solicitado.");
+                }
+
+              
+                if (role.Name == Env.SUPER_ADMIN_ROLE_NAME)
+                {
+                    return Response<UpdateRoleDTO>.Failure("El rol de administrador no se puede modificar.");
+                }
+
+                
+                if (await _context.RestauranteRoles.AnyAsync(r => r.Name == dto.Name && r.Id != dto.Id))
+                {
+                    return Response<UpdateRoleDTO>.Failure("Ya existe otro rol con ese nombre.");
+                }
+
+                
+                List<Guid> newIds = dto.PermissionIds.Distinct().ToList();
+
+                int found = await _context.Permissions.CountAsync(p => newIds.Contains(p.Id));
+
+                if (found != newIds.Count)
+                {
+                    return Response<UpdateRoleDTO>.Failure("Alguno de los permisos seleccionados no existe.");
+                }
+
+                role.Name = dto.Name;
+
+                
+                List<RolePermission> toRemove = role.RolePermissions
+                    .Where(rp => !newIds.Contains(rp.PermissionId))
+                    .ToList();
+
+                _context.RolePermissions.RemoveRange(toRemove);
+
+                
+                HashSet<Guid> currentIds = role.RolePermissions.Select(rp => rp.PermissionId).ToHashSet();
+
+                foreach (Guid permissionId in newIds.Where(id => !currentIds.Contains(id)))
+                {
+                    await _context.RolePermissions.AddAsync(new RolePermission
+                    {
+                        RoleId = role.Id,
+                        PermissionId = permissionId
+                    });
+                }
+
+               
+                await _context.SaveChangesAsync();
+
+                return Response<UpdateRoleDTO>.Success(dto, "Rol actualizado con éxito");
+            }
+            catch (Exception ex)
+            {
+                return Response<UpdateRoleDTO>.Failure(ex);
+            }
         }
 
         public async Task<Response> DeleteAsync(Guid id)
         {
-            bool hasUsers = await _context.Users.AnyAsync(u => u.RoleId == id);
-
-            if (hasUsers)
+            try
             {
-                return Response.Failure("No se puede eliminar el rol porque tiene empleados asociados.");
-            }
+                Role? role = await _context.RestauranteRoles
+                    .Include(r => r.RolePermissions)
+                    .FirstOrDefaultAsync(r => r.Id == id);
 
-            return await DeleteAsync<Role>(id);
+                if (role is null)
+                {
+                    return Response.Failure("No existe el rol solicitado.");
+                }
+
+                if (role.Name == Env.SUPER_ADMIN_ROLE_NAME)
+                {
+                    return Response.Failure("El rol de administrador no se puede eliminar.");
+                }
+
+                if (await _context.Users.AnyAsync(u => u.RoleId == id))
+                {
+                    return Response.Failure("No se puede eliminar el rol porque tiene usuarios asociados.");
+                }
+
+                _context.RolePermissions.RemoveRange(role.RolePermissions);
+                _context.RestauranteRoles.Remove(role);
+
+                await _context.SaveChangesAsync();
+
+                return Response.Success("Rol eliminado con éxito");
+            }
+            catch (Exception ex)
+            {
+                return Response.Failure(ex);
+            }
         }
         public async Task<Response<List<PermissionForRoleDTO>>> GetPermissionsAsync(IEnumerable<Guid>? selectedIds = null)
         {
