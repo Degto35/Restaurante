@@ -14,7 +14,7 @@ namespace Restaurante.Web.Services.Implementations
         private readonly SignInManager<User> _signInManager;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-
+        private readonly Dictionary<string, bool> _permissionCache = new();
         public AccountService(SignInManager<User> signInManager, DataContext context,
                               IHttpContextAccessor httpContextAccessor)
         {
@@ -121,6 +121,12 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<bool> AccountUserIsAuthorizedAsync(string permissionCode)
         {
+           
+            if (_permissionCache.TryGetValue(permissionCode, out bool cached))
+            {
+                return cached;
+            }
+
             string? userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId is null)
@@ -128,13 +134,17 @@ namespace Restaurante.Web.Services.Implementations
                 return false;
             }
 
-
-            return await _context.Users.AnyAsync(u =>
+            
+            bool isAuthorized = await _context.Users.AnyAsync(u =>
                 u.Id == userId &&
                 (u.Role!.Name == Env.SUPER_ADMIN_ROLE_NAME ||
                  u.Role!.RolePermissions.Any(rp => rp.Permission!.Code == permissionCode)));
-        }
 
+            
+            _permissionCache[permissionCode] = isAuthorized;
+
+            return isAuthorized;
+        }
 
         private async Task<User?> GetCurrentUserAsync()
         {
