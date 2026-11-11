@@ -4,6 +4,7 @@ using Restaurante.Web.Services.Abstractions;
 using Restaurante.Web.Services.Implementations;
 using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Helpers.Implementations;
+using Restaurante.Web.Data.Seeders;
 
 namespace Restaurante.Web
 {
@@ -22,6 +23,7 @@ namespace Restaurante.Web
 
             // Services
             AddServices(builder);
+            builder.Services.AddTransient<SeedDb>();
 
             return builder;
         }
@@ -35,6 +37,25 @@ namespace Restaurante.Web
             builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
             builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();
+
+
+
+        }
+        public static WebApplication AddCustomWebApplicationConfiguration(this WebApplication app)
+        {
+            SeedData(app);
+
+            return app;
+        }
+
+        private static void SeedData(WebApplication app)
+        {
+            IServiceScopeFactory scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+
+            using IServiceScope scope = scopeFactory.CreateScope();
+            SeedDb service = scope.ServiceProvider.GetRequiredService<SeedDb>();
+            service.SeedAsync().Wait();
         }
     }
+
 }
