@@ -4,6 +4,8 @@ using Restaurante.Web.Services.Abstractions;
 using Restaurante.Web.Services.Implementations;
 using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Helpers.Implementations;
+using Microsoft.AspNetCore.Identity;
+using Restaurante.Web.Data.Entities;
 
 namespace Restaurante.Web
 {
@@ -11,17 +13,18 @@ namespace Restaurante.Web
     {
         public static WebApplicationBuilder AddCustomConfiguration(this WebApplicationBuilder builder)
         {
-            // Data Context
+            
             builder.Services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection"));
             });
 
-            // AutoMapper
+            
             builder.Services.AddAutoMapper(typeof(Program));
 
-            // Services
+      
             AddServices(builder);
+            AddIAM(builder);
 
             return builder;
         }
@@ -35,6 +38,32 @@ namespace Restaurante.Web
             builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
             builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();
+        }
+        
+        private static void AddIAM(WebApplicationBuilder builder)
+        {
+            builder.Services.AddIdentity<User, IdentityRole>(config =>
+            {
+                config.User.RequireUniqueEmail = true;
+
+                
+                config.Password.RequireDigit = false;
+                config.Password.RequiredUniqueChars = 0;
+                config.Password.RequireLowercase = false;
+                config.Password.RequireUppercase = false;
+                config.Password.RequireNonAlphanumeric = false;
+                config.Password.RequiredLength = 4;
+            }).AddEntityFrameworkStores<DataContext>()
+              .AddDefaultTokenProviders();
+
+            builder.Services.ConfigureApplicationCookie(config =>
+            {
+                config.Cookie.Name = "Auth";
+                config.ExpireTimeSpan = TimeSpan.FromHours(8);   
+                config.SlidingExpiration = true;                 
+                config.LoginPath = "/Account/Login";             
+                config.AccessDeniedPath = "/Account/AccessDenied";
+            });
         }
     }
 }

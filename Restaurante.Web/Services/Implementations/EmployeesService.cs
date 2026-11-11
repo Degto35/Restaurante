@@ -48,7 +48,7 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<Response<CreateEmployeeDTO>> CreateAsync(CreateEmployeeDTO dto)
         {
-            if (!await _context.Roles.AnyAsync(r => r.Id == dto.RoleId))
+            if (!await _context.RestauranteRoles.AnyAsync(r => r.Id == dto.RoleId))
             {
                 return Response<CreateEmployeeDTO>.Failure("El rol seleccionado no existe.");
             }
@@ -58,7 +58,7 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<Response<UpdateEmployeeDTO>> UpdateAsync(UpdateEmployeeDTO dto)
         {
-            if (!await _context.Roles.AnyAsync(r => r.Id == dto.RoleId))
+            if (!await _context.RestauranteRoles.AnyAsync(r => r.Id == dto.RoleId))
             {
                 return Response<UpdateEmployeeDTO>.Failure("El rol seleccionado no existe.");
             }

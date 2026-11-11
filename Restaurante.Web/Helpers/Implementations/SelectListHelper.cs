@@ -16,7 +16,7 @@ namespace Restaurante.Web.Helpers.Implementations
 
         public async Task<List<SelectListItem>> GetRolesSelectListAsync()
         {
-            return await _context.Roles
+            return await _context.RestauranteRoles
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {

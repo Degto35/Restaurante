@@ -20,7 +20,7 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<Response<PaginationResponse<RoleDTO>>> GetPaginationAsync(PaginationRequest request)
         {
-            IQueryable<Role> query = _context.Roles.AsQueryable();
+            IQueryable<Role> query = _context.RestauranteRoles.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Filter))
             {
