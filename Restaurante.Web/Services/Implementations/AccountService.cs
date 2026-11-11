@@ -113,8 +113,29 @@ namespace Restaurante.Web.Services.Implementations
                 return Response.Failure(ex);
             }
         }
+        public bool AccountUserIsAuthenticated()
+        {
+            ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
+            return user?.Identity is not null && user.Identity.IsAuthenticated;
+        }
 
-      
+        public async Task<bool> AccountUserIsAuthorizedAsync(string permissionCode)
+        {
+            string? userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId is null)
+            {
+                return false;
+            }
+
+
+            return await _context.Users.AnyAsync(u =>
+                u.Id == userId &&
+                (u.Role!.Name == Env.SUPER_ADMIN_ROLE_NAME ||
+                 u.Role!.RolePermissions.Any(rp => rp.Permission!.Code == permissionCode)));
+        }
+
+
         private async Task<User?> GetCurrentUserAsync()
         {
             string? userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -3,6 +3,7 @@ using Restaurante.Web.Core;
 using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Categories;
 using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Core.Attributes;
 
 namespace Restaurante.Web.Controllers
 {
@@ -16,6 +17,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("categories.show")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             Response<PaginationResponse<CategoryDTO>> response = await _categoriesService.GetPaginationAsync(request);
@@ -30,6 +32,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("categories.show")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<CategoryDTO> response = await _categoriesService.GetOneAsync(id);
@@ -44,12 +47,14 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("categories.create")]
         public IActionResult Create()
         {
             return View(new CreateCategoryDTO());
         }
 
         [HttpPost]
+        [CustomAuthorize("categories.create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateCategoryDTO dto)
         {
@@ -71,6 +76,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("categories.update")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<CategoryDTO> response = await _categoriesService.GetOneAsync(id);
@@ -93,6 +99,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("categories.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateCategoryDTO dto)
         {
@@ -114,6 +121,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("categories.delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {

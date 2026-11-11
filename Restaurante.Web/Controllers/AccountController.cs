@@ -122,6 +122,7 @@ namespace Restaurante.Web.Controllers
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
+            Response.StatusCode = StatusCodes.Status403Forbidden;
             return View();
         }
 
