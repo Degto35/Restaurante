@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Restaurante.Web.Core;
+using Restaurante.Web.Core.Attributes;
 using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Roles;
 using Restaurante.Web.Services.Abstractions;
@@ -16,6 +17,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("roles.show")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             Response<PaginationResponse<RoleDTO>> response = await _rolesService.GetPaginationAsync(request);
@@ -30,6 +32,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("roles.show")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<RoleDTO> response = await _rolesService.GetOneAsync(id);
@@ -44,17 +47,23 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Create()
+        [CustomAuthorize("roles.create")]
+        public async Task<IActionResult> Create()
         {
-            return View(new CreateRoleDTO());
+            CreateRoleDTO dto = new CreateRoleDTO();
+            await FillPermissionsAsync(dto);
+
+            return View(dto);
         }
 
         [HttpPost]
+        [CustomAuthorize("roles.create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateRoleDTO dto)
         {
             if (!ModelState.IsValid)
             {
+                await FillPermissionsAsync(dto);
                 return View(dto);
             }
 
@@ -63,6 +72,7 @@ namespace Restaurante.Web.Controllers
             if (!response.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear el rol.");
+                await FillPermissionsAsync(dto);
                 return View(dto);
             }
 
@@ -71,6 +81,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("roles.update")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<RoleDTO> response = await _rolesService.GetOneAsync(id);
@@ -91,6 +102,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("roles.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateRoleDTO dto)
         {
@@ -112,6 +124,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("roles.delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -119,6 +132,14 @@ namespace Restaurante.Web.Controllers
 
             TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
             return RedirectToAction(nameof(Index));
+        }
+
+       
+        private async Task FillPermissionsAsync(CreateRoleDTO dto)
+        {
+            Response<List<PermissionForRoleDTO>> response = await _rolesService.GetPermissionsAsync(dto.PermissionIds);
+
+            dto.Permissions = response.IsSuccess ? response.Result! : [];
         }
     }
 }

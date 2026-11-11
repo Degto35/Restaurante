@@ -1,7 +1,9 @@
-﻿@model Restaurante.Web.DTOs.Roles.RoleDTO
+﻿@using Restaurante.Web.Core
+@model Restaurante.Web.DTOs.Roles.RoleDTO
 
 @{
     ViewData["Title"] = "Detalles del Rol";
+    var granted = Model.Permissions.Where(p => p.Selected).GroupBy(p => p.Module).ToList();
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -12,7 +14,41 @@
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Name)</dd>
     </dl>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+
+<h5>Permisos</h5>
+
+@if (Model.Name == Env.SUPER_ADMIN_ROLE_NAME)
+{
+    <div class="alert alert-info">Este rol tiene acceso total al sistema: no necesita permisos individuales.</div>
+}
+else if (!granted.Any())
+{
+    <p class="text-muted">Este rol no tiene permisos asignados.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var module in granted)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-header fw-bold">@module.Key</div>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var permission in module)
+                        {
+                            <li class="list-group-item">@permission.Description</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="mt-3">
+    @if (await AccountService.AccountUserIsAuthorizedAsync("roles.update"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    }
     <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
 </div>

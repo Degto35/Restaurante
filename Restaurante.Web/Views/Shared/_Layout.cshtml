@@ -32,9 +32,14 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="DiningTables" asp-action="Index">Mesas</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Roles" asp-action="Index">Roles</a>
-                        </li>
+
+                        @if (await AccountService.AccountUserIsAuthorizedAsync("roles.show"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Roles" asp-action="Index">Roles</a>
+                            </li>
+                        }
+
                         @if (await AccountService.AccountUserIsAuthorizedAsync("users.show"))
                         {
                             <li class="nav-item">
