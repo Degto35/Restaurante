@@ -1,39 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Data.Entities;
-using Restaurante.Web.Entities;
 
 namespace Restaurante.Web.Data
 {
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<User>
     {
         public DataContext(DbContextOptions<DataContext> options)
             : base(options)
         {
         }
 
-        public DbSet<Categories> Categories { get; set; }
-        public DbSet<Dishes> Dishes { get; set; }
-        public DbSet<Role> Roles { get; set; }                  
-        public DbSet<Employees> Employees { get; set; }
-        public DbSet<DiningTable> DiningTables { get; set; }    
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Dish> Dishes { get; set; }
+        public DbSet<Role> RestauranteRoles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<DiningTable> DiningTables { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Bill> Bills { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Dishes>()
+            modelBuilder.Entity<Role>().ToTable("Roles");
+
+            modelBuilder.Entity<Dish>()
                 .HasOne(d => d.Category)
                 .WithMany(c => c.Dishes)
-                .HasForeignKey(d => d.IdCategories)
-                .OnDelete(DeleteBehavior.Restrict);
-
-      
-            modelBuilder.Entity<Employees>()
-                .HasOne(e => e.Role)
-                .WithMany(r => r.Employees)
-                .HasForeignKey(e => e.IdRole)
+                .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
@@ -42,11 +39,10 @@ namespace Restaurante.Web.Data
                 .HasForeignKey(o => o.DiningTableId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-          
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.Employee)
-                .WithMany(e => e.Orders)
-                .HasForeignKey(o => o.EmployeeId)
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrderDetail>()
@@ -60,6 +56,39 @@ namespace Restaurante.Web.Data
                 .WithMany()
                 .HasForeignKey(d => d.DishId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Bill>()
+                .HasOne(b => b.Order)
+                .WithOne(o => o.Bill)
+                .HasForeignKey<Bill>(b => b.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+          
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Role)
+                .WithMany(r => r.Users)
+                .HasForeignKey(u => u.RoleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            
+            modelBuilder.Entity<RolePermission>()
+                .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleId);
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionId);
+
+        
+            modelBuilder.Entity<Role>().HasIndex(r => r.Name).IsUnique();
+            modelBuilder.Entity<User>().HasIndex(u => u.Document).IsUnique();
+            modelBuilder.Entity<Permission>().HasIndex(p => p.Code).IsUnique();
+            modelBuilder.Entity<DiningTable>().HasIndex(t => t.Number).IsUnique();
         }
     }
 }

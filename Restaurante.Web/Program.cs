@@ -1,39 +1,28 @@
-using Microsoft.EntityFrameworkCore;
-using Restaurante.Web.Data;
-using Restaurante.Web.Services.Abstractions;
-using Restaurante.Web.Services.Implementations;
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection")));
-// NOTA: MyConnection" debe ser el nombre exacto que pusiste en appsettings.json
-
-// 2. Registrar tus Servicios (Interfaz -> Implementación)
-builder.Services.AddScoped<ICategoriesService, CategoriesService>();
-builder.Services.AddScoped<IDishesService, DishesService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IEmployeesService, EmployeesService>();
-builder.Services.AddScoped<ITablesService, TablesService>();
-builder.Services.AddScoped<IOrdersService, OrdersService>();
-
-var app = builder.Build();
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Restaurante.Web;
 
 
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Configure the HTTP request pipeline.
+builder.Services.AddControllersWithViews(options =>
+{
+    
+    options.Filters.Add(new AuthorizeFilter());
+});
+
+builder.AddCustomConfiguration();
+
+WebApplication app = builder.Build();
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -43,16 +32,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.AddCustomWebApplicationConfiguration();
 
 app.Run();
-
-//estamos añadiendo texto
-//para probar que se guarden las modificaciones
-//gracias :D
-//gracias :D
-
-//hola mundo
-//hola
-//poloooo marcoooo!!
-//aqui estuve +
-

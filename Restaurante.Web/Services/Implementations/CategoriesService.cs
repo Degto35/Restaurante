@@ -1,83 +1,85 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.Data;
-using Restaurante.Web.DTOs.Categories;
-using Restaurante.Web.Entities;
 using Restaurante.Web.Data.Entities;
+using Restaurante.Web.DTOs.Categories;
 using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Services.Implementations
 {
-    public class CategoriesService : ICategoriesService
+    public class CategoriesService : CustomQueryableOperationsService, ICategoriesService
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public CategoriesService(DataContext context)
+        public CategoriesService(DataContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<List<CategoryDTO>> ObtenerTodasAsync()
+        public async Task<Response<PaginationResponse<CategoryDTO>>> GetPaginationAsync(PaginationRequest request)
         {
-            return await _context.Categories
-                .Select(c => new CategoryDTO
-                {
-                    IdCategories = c.IdCategories,
-                    Name = c.Name,
-                    Description = c.Description,
-                    State= c.State
-                }).ToListAsync();
-        }
+            IQueryable<Category> query = _context.Categories.AsQueryable();
 
-        public async Task<CategoryDTO?> ObtenerPorIdAsync(Guid id)
-        {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null) return null;
-
-            return new CategoryDTO
+            if (!string.IsNullOrWhiteSpace(request.Filter))
             {
-                IdCategories = category.IdCategories,
-                Name = category.Name,
-                Description = category.Description,
-                State= category.State
-            };
+                string filter = request.Filter.ToLower();
+
+                query = query.Where(c => c.Name.ToLower().Contains(filter)
+                                      || (c.Description != null && c.Description.ToLower().Contains(filter)));
+            }
+
+            
+            query = query.OrderBy(c => c.Name);
+
+            return await GetPagedListAsync<CategoryDTO, Category>(request, query);
         }
 
-        public async Task<bool> CrearAsync(CreateCategoryDTO dto)
+        
+        public async Task<Response<List<CategoryDTO>>> GetAllAsync()
         {
-
-            var categories = new Categories
+            try
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                State = true
-            };
+                List<Category> categories = await _context.Categories
+                    .OrderBy(c => c.Name)
+                    .ToListAsync();
 
-            _context.Categories.Add(categories);
-            return await _context.SaveChangesAsync() > 0;
+                return Response<List<CategoryDTO>>.Success(_mapper.Map<List<CategoryDTO>>(categories));
+            }
+            catch (Exception ex)
+            {
+                return Response<List<CategoryDTO>>.Failure(ex);
+            }
         }
 
-        public async Task<bool> ActualizarAsync(UpdateCategoryDTO dto)
+        public async Task<Response<CategoryDTO>> GetOneAsync(Guid id)
         {
-            var category = await _context.Categories.FindAsync(dto.IdCategories);
-            if (category == null) return false;
-
-            category.Name = dto.Name;
-            category.Description = dto.Description;
-            category.State = dto.State;
-
-            _context.Categories.Update(category);
-            return await _context.SaveChangesAsync() > 0;
+            return await GetOneAsync<CategoryDTO, Category>(id);
         }
 
-        public async Task<bool> EliminarAsync(Guid id)
+        public async Task<Response<CreateCategoryDTO>> CreateAsync(CreateCategoryDTO dto)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null) return false;
-            var hasDishes = await _context.Dishes.AnyAsync(p => p.IdCategories == id);
-            if (hasDishes) return false;
+            return await CreateAsync<CreateCategoryDTO, Category>(dto);
+        }
 
-            _context.Categories.Remove(category);
-            return await _context.SaveChangesAsync() > 0;
+        public async Task<Response<UpdateCategoryDTO>> UpdateAsync(UpdateCategoryDTO dto)
+        {
+            return await UpdateAsync<UpdateCategoryDTO, Category>(dto, dto.Id);
+        }
+
+        public async Task<Response> DeleteAsync(Guid id)
+        {
+            bool hasDishes = await _context.Dishes.AnyAsync(d => d.CategoryId == id);
+
+            if (hasDishes)
+            {
+                return Response.Failure("No se puede eliminar la categoría porque tiene platos asociados.");
+            }
+
+            return await DeleteAsync<Category>(id);
         }
     }
 }

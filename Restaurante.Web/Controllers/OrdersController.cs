@@ -1,46 +1,46 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Restaurante.Web.Core;
+using Restaurante.Web.DTOs.DiningTables;
 using Restaurante.Web.DTOs.Orders;
 using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Services.Implementations;
+using Restaurante.Web.Helpers.Abstractions;
+using Restaurante.Web.Core.Pagination;
+using Restaurante.Web.Core.Attributes;
 
 namespace Restaurante.Web.Controllers
 {
     public class OrdersController : Controller
     {
         private readonly IOrdersService _ordersService;
-        private readonly ITablesService _tablesService;
-        private readonly IEmployeesService _employeesService;
-        private readonly IDishesService _dishesService;
+        private readonly ISelectListHelper _selectListHelper;
 
-        public OrdersController(
-            IOrdersService ordersService,
-            ITablesService tablesService,
-            IEmployeesService employeesService,
-            IDishesService dishesService)
+        public OrdersController(IOrdersService ordersService, ISelectListHelper selectListHelper)
         {
             _ordersService = ordersService;
-            _tablesService = tablesService;
-            _employeesService = employeesService;
-            _dishesService = dishesService;
+            _selectListHelper = selectListHelper;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        [CustomAuthorize("orders.show")]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            Response<List<OrderDTO>> response = await _ordersService.GetAllAsync();
+            Response<PaginationResponse<OrderDTO>> response = await _ordersService.GetPaginationAsync(request);
 
             if (!response.IsSuccess)
             {
                 TempData["Error"] = response.Message;
-                return View(new List<OrderDTO>());
+                return RedirectToAction("Index", "Home");
             }
 
             return View(response.Result!);
         }
 
+        [CustomAuthorize("orders.show")]
         public async Task<IActionResult> Details(Guid id)
         {
-            Response<OrderDTO> response = await _ordersService.GetByIdAsync(id);
+            Response<OrderDTO> response = await _ordersService.GetOneAsync(id);
 
             if (!response.IsSuccess)
             {
@@ -48,23 +48,28 @@ namespace Restaurante.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await LoadDishesAsync();
-            return View(response.Result!);
+            OrderDTO order = response.Result!;
+            order.Dishes = await _selectListHelper.GetAvailableDishesSelectListAsync();
+            return View(order);
         }
 
+        [HttpGet]
+        [CustomAuthorize("orders.create")]
         public async Task<IActionResult> Create()
         {
-            await LoadCreateListsAsync();
-            return View(new CreateOrderDTO());
+            CreateOrderDTO dto = new CreateOrderDTO();
+            await FillListsAsync(dto);
+            return View(dto);
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateOrderDTO dto)
         {
             if (!ModelState.IsValid)
             {
-                await LoadCreateListsAsync();
+                await FillListsAsync(dto);
                 return View(dto);
             }
 
@@ -73,7 +78,7 @@ namespace Restaurante.Web.Controllers
             if (!response.IsSuccess)
             {
                 ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear el pedido.");
-                await LoadCreateListsAsync();
+                await FillListsAsync(dto);
                 return View(dto);
             }
 
@@ -82,6 +87,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddDetail(CreateOrderDetailDTO dto)
         {
@@ -98,6 +104,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveDetail(Guid detailId, Guid orderId)
         {
@@ -108,6 +115,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(UpdateOrderDTO dto)
         {
@@ -117,43 +125,21 @@ namespace Restaurante.Web.Controllers
             return RedirectToAction(nameof(Details), new { id = dto.Id });
         }
 
-        // Dropdowns for the Create form: only available tables and all employees.
-        private async Task LoadCreateListsAsync()
+        [HttpPost]
+        [CustomAuthorize("orders.pay")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Pay(PayOrderDTO dto)
         {
-            var tables = await _tablesService.ObtenerTodasAsync();
-            var employees = await _employeesService.ObtenerTodosAsync();
+            Response response = await _ordersService.PayAsync(dto);
 
-            ViewBag.Tables = tables
-                .Where(t => t.IsAvailable)
-                .Select(t => new SelectListItem
-                {
-                    Value = t.IdTable.ToString(),
-                    Text = $"Mesa {t.Number} ({t.Capacity} personas)"
-                })
-                .ToList();
-
-            ViewBag.Employees = employees
-                .Select(e => new SelectListItem
-                {
-                    Value = e.IdEmployee.ToString(),
-                    Text = e.Name
-                })
-                .ToList();
+            TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
+            return RedirectToAction(nameof(Details), new { id = dto.OrderId });
         }
 
-        // Dropdown for the "add dish" form on the Details page: only active dishes.
-        private async Task LoadDishesAsync()
+        private async Task FillListsAsync(CreateOrderDTO dto)
         {
-            var dishes = await _dishesService.ObtenerTodosAsync();
-
-            ViewBag.Dishes = dishes
-                .Where(d => d.State)
-                .Select(d => new SelectListItem
-                {
-                    Value = d.IdDish.ToString(),
-                    Text = $"{d.Name} - {d.Price:C}"
-                })
-                .ToList();
+            dto.Tables = await _selectListHelper.GetAvailableTablesSelectListAsync();
+            dto.Users = await _selectListHelper.GetUsersSelectListAsync();
         }
     }
 }

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Detalles del Plato";
 }
 
-<h1>Detalles del Plato</h1>
+<h1>@ViewData["Title"]</h1>
 
 <div>
     <dl class="row">
@@ -15,16 +15,19 @@
         <dd class="col-sm-10">@Html.DisplayFor(model => model.Description)</dd>
 
         <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Price)</dt>
-        <dd class="col-sm-10">@Html.DisplayFor(model => model.Price)</dd>
+        <dd class="col-sm-10">@Model.Price.ToString("C")</dd>
 
         <dt class="col-sm-2">@Html.DisplayNameFor(model => model.CategoryName)</dt>
         <dd class="col-sm-10">@Html.DisplayFor(model => model.CategoryName)</dd>
 
-        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.State)</dt>
-        <dd class="col-sm-10">@(Model.State ? "Activo" : "Inactivo")</dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.IsActive)</dt>
+        <dd class="col-sm-10">@(Model.IsActive ? "Activo" : "Inactivo")</dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.IdDish" class="btn btn-warning">Editar</a>
+    @if (await AccountService.AccountUserIsAuthorizedAsync("dishes.update"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    }
     <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
 </div>

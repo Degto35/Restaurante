@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Restaurante.Web.DTOs.Categories.CategoryDTO>
+﻿@model Restaurante.Web.Core.Pagination.PaginationResponse<Restaurante.Web.DTOs.Categories.CategoryDTO>
 
 @{
     ViewData["Title"] = "Lista de Categorías";
@@ -6,40 +6,89 @@
 
 <h1>@ViewData["Title"]</h1>
 
-@if (TempData["Exito"] != null)
+<partial name="_Alerts" />
+
+@if (await AccountService.AccountUserIsAuthorizedAsync("categories.create"))
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Exito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Crear Nueva Categoría</a>
+    </p>
 }
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nueva Categoría</a>
-</p>
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="RecordsPerPage" class="form-select" onchange="this.form.submit()">
+            @foreach (int size in new[] { 5, 10, 15, 30, 50 })
+            {
+                <option value="@size" selected="@(Model.RecordsPerPage == size)">@size</option>
+            }
+        </select>
+    </div>
+    <div class="col">
+        <div class="input-group">
+            <input type="text" name="Filter" value="@Model.Filter" class="form-control"
+                   placeholder="Buscar por nombre o descripción..." />
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </div>
+</form>
 
 <table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.Name)</th>
-            <th>@Html.DisplayNameFor(model => model.Description)</th>
-            <th>@Html.DisplayNameFor(model => model.State)</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Estado</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @{
+            bool canUpdate = await AccountService.AccountUserIsAuthorizedAsync("categories.update");
+            bool canDelete = await AccountService.AccountUserIsAuthorizedAsync("categories.delete");
+        }
+
+        @if (!Model.List.Any())
         {
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                <td>@(item.State ? "Activa" : "Inactiva")</td>
+                <td colspan="4" class="text-center text-muted">No se encontraron categorías.</td>
+            </tr>
+        }
+
+        @foreach (var item in Model.List)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdCategories" class="btn btn-warning btn-sm">Editar</a>
-                    <a asp-action="Details" asp-route-id="@item.IdCategories" class="btn btn-info btn-sm">Detalles</a>
-                    <a asp-action="Delete" asp-route-id="@item.IdCategories" class="btn btn-danger btn-sm">Eliminar</a>
+                    <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">
+                        @(item.IsActive ? "Activa" : "Inactiva")
+                    </span>
+                </td>
+                <td>
+                    @if (canUpdate)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                    }
+
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Detalles</a>
+
+                    @if (canDelete)
+                    {
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('¿Seguro que desea eliminar esta categoría?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<p class="text-muted">Total: @Model.TotalCount categorías</p>
+
+@if (Model.TotalPages > 1)
+{
+    <partial name="_PaginationComponent" model="Model" />
+}

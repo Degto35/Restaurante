@@ -1,0 +1,27 @@
+﻿@model Restaurante.Web.DTOs.DiningTables.DiningTableDTO
+
+@{
+    ViewData["Title"] = "Detalles de la Mesa";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Number)</dt>
+        <dd class="col-sm-10">Mesa #@Model.Number</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Capacity)</dt>
+        <dd class="col-sm-10">@Model.Capacity personas</dd>
+
+        <dt class="col-sm-2">Estado</dt>
+        <dd class="col-sm-10">@(Model.IsAvailable ? "Disponible" : "Ocupada")</dd>
+    </dl>
+</div>
+<div>
+    @if (await AccountService.AccountUserIsAuthorizedAsync("tables.update"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+</div>
