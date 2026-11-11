@@ -1,86 +1,58 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.Data;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.Data.Enums;
 using Restaurante.Web.DTOs.Orders;
 using Restaurante.Web.Services.Abstractions;
-using System.Linq.Expressions;
 
 namespace Restaurante.Web.Services.Implementations
 {
-    public class OrdersService : IOrdersService
+    public class OrdersService : CustomQueryableOperationsService, IOrdersService
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
 
-        public OrdersService(DataContext context)
+        public OrdersService(DataContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        
-        private static readonly Expression<Func<Order, OrderDTO>> ToDto = o => new OrderDTO
-        {
-            Id = o.Id,
-            Date = o.Date,
-            Status = o.Status,
-            DiningTableId = o.DiningTableId,
-            TableNumber = o.DiningTable.Number,
-            EmployeeId = o.EmployeeId,
-            EmployeeName = o.Employee.Name,
-            OrderDetails = o.OrderDetails.Select(d => new OrderDetailDTO
-            {
-                Id = d.Id,
-                DishId = d.DishId,
-                DishName = d.Dish.Name,
-                Quantity = d.Quantity,
-                UnitPrice = d.UnitPrice
-            }).ToList()
-        };
+        private IQueryable<Order> OrdersWithRelations()
+            => _context.Orders
+                .Include(o => o.DiningTable)
+                .Include(o => o.Employee)
+                .Include(o => o.Bill)
+                .Include(o => o.OrderDetails).ThenInclude(d => d.Dish);
 
-      
+
         private static bool IsClosed(OrderStatus status)
             => status == OrderStatus.Paid || status == OrderStatus.Cancelled;
 
-        public async Task<Response<List<OrderDTO>>> GetAllAsync()
+        public async Task<Response<PaginationResponse<OrderDTO>>> GetPaginationAsync(PaginationRequest request)
         {
-            try
-            {
-                List<OrderDTO> orders = await _context.Orders
-                    .OrderByDescending(o => o.Date)
-                    .Select(ToDto)
-                    .ToListAsync();
+            IQueryable<Order> query = OrdersWithRelations();
 
-                return Response<List<OrderDTO>>.Success(orders);
-            }
-            catch (Exception ex)
+            if (!string.IsNullOrWhiteSpace(request.Filter))
             {
-                return Response<List<OrderDTO>>.Failure(ex);
+                string filter = request.Filter.ToLower();
+
+                query = query.Where(o => o.Employee.Name.ToLower().Contains(filter)
+                                      || o.DiningTable.Number.ToString().Contains(filter));
             }
+
+            query = query.OrderByDescending(o => o.Date);
+
+            return await GetPagedListAsync<OrderDTO, Order>(request, query);
         }
 
-        public async Task<Response<OrderDTO>> GetByIdAsync(Guid id)
+        public async Task<Response<OrderDTO>> GetOneAsync(Guid id)
         {
-            try
-            {
-                OrderDTO? order = await _context.Orders
-                    .Where(o => o.Id == id)
-                    .Select(ToDto)
-                    .FirstOrDefaultAsync();
-
-                if (order is null)
-                {
-                    return Response<OrderDTO>.Failure("El pedido no existe.");
-                }
-
-                return Response<OrderDTO>.Success(order);
-            }
-            catch (Exception ex)
-            {
-                return Response<OrderDTO>.Failure(ex);
-            }
+            return await GetOneAsync<OrderDTO, Order>(id, OrdersWithRelations());
         }
-
         public async Task<Response<OrderDTO>> CreateAsync(CreateOrderDTO dto)
         {
             try
@@ -97,7 +69,7 @@ namespace Restaurante.Web.Services.Implementations
                     return Response<OrderDTO>.Failure("La mesa seleccionada no está disponible.");
                 }
 
-                bool employeeExists = await _context.Employees.AnyAsync(e => e.IdEmployee == dto.EmployeeId);
+                bool employeeExists = await _context.Employees.AnyAsync(e => e.Id == dto.EmployeeId);
 
                 if (!employeeExists)
                 {
@@ -117,12 +89,9 @@ namespace Restaurante.Web.Services.Implementations
 
                 await _context.SaveChangesAsync();
 
-                OrderDTO created = await _context.Orders
-                    .Where(o => o.Id == order.Id)
-                    .Select(ToDto)
-                    .FirstAsync();
+                Order created = await OrdersWithRelations().FirstAsync(o => o.Id == order.Id);
 
-                return Response<OrderDTO>.Success(created, "Pedido creado correctamente.");
+                return Response<OrderDTO>.Success(_mapper.Map<OrderDTO>(created), "Pedido creado correctamente.");
             }
             catch (Exception ex)
             {
@@ -149,9 +118,9 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("Un pedido pagado o cancelado ya no se puede modificar.");
                 }
 
-                if (dto.Status == OrderStatus.Paid && !order.OrderDetails.Any())
+                if (dto.Status == OrderStatus.Paid)
                 {
-                    return Response.Failure("No se puede pagar un pedido sin platos.");
+                    return Response.Failure("Para pagar un pedido use la opción Pagar.");
                 }
 
                 order.Status = dto.Status;
@@ -188,9 +157,9 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("No se pueden agregar platos a un pedido cerrado.");
                 }
 
-                var dish = await _context.Dishes.FindAsync(dto.DishId);
+                var dish = await _context.Dishes.Include(d => d.Category).FirstOrDefaultAsync(d => d.Id == dto.DishId);
 
-                if (dish is null || !dish.State)
+                if (dish is null || !dish.IsActive || !dish.Category.IsActive)
                 {
                     return Response.Failure("El plato seleccionado no está disponible.");
                 }
@@ -247,6 +216,57 @@ namespace Restaurante.Web.Services.Implementations
                 await _context.SaveChangesAsync();
 
                 return Response.Success("Plato eliminado del pedido.");
+            }
+            catch (Exception ex)
+            {
+                return Response.Failure(ex);
+            }
+        }
+
+        public async Task<Response> PayAsync(PayOrderDTO dto)
+        {
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.DiningTable)
+                    .Include(o => o.OrderDetails)
+                    .FirstOrDefaultAsync(o => o.Id == dto.OrderId);
+
+                if (order is null)
+                {
+                    return Response.Failure("El pedido no existe.");
+                }
+
+                if (IsClosed(order.Status))
+                {
+                    return Response.Failure("El pedido ya está cerrado.");
+                }
+
+                if (!order.OrderDetails.Any())
+                {
+                    return Response.Failure("No se puede pagar un pedido sin platos.");
+                }
+
+                if (!Enum.IsDefined(dto.PaymentMethod))
+                {
+                    return Response.Failure("El método de pago no es válido.");
+                }
+
+                Bill bill = new()
+                {
+                    OrderId = order.Id,
+                    PaymentMethod = dto.PaymentMethod,
+                    PaidAt = DateTime.Now,
+                    Total = order.Total
+                };
+
+                order.Status = OrderStatus.Paid;
+                order.DiningTable.IsAvailable = true;
+                _context.Bills.Add(bill);
+
+                await _context.SaveChangesAsync();
+
+                return Response.Success("Pago registrado correctamente.");
             }
             catch (Exception ex)
             {

@@ -1,18 +1,19 @@
-﻿using Restaurante.Web.Data.Entities;
+﻿using Restaurante.Web.Data.Abstractions;
+using Restaurante.Web.Data.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace Restaurante.Web.Entities
+namespace Restaurante.Web.Data.Entities
 {
-    public class Role
+    public class Role : IId
     {
         [Key]
-        public Guid IdRole { get; set; }
+        public Guid Id { get; set; }
 
         [Display(Name = "Nombre del rol")]
         [MaxLength(32, ErrorMessage = "El campo {0} debe tener máximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido")]
-        public string NameRole { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
 
-        public ICollection<Employees> Employees { get; set; } = new List<Employees>();
+        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

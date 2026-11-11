@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Categories;
 using Restaurante.Web.Services.Abstractions;
 
@@ -10,53 +12,81 @@ namespace Restaurante.Web.Controllers
 
         public CategoriesController(ICategoriesService categoriesService)
         {
-            this._categoriesService = categoriesService;
+            _categoriesService = categoriesService;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            var categories = await _categoriesService.ObtenerTodasAsync();
-            return View(categories);
+            Response<PaginationResponse<CategoryDTO>> response = await _categoriesService.GetPaginationAsync(request);
+
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(response.Result!);
         }
+
+        [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
-            var category = await _categoriesService.ObtenerPorIdAsync(id);
-            if (category == null) return NotFound();
+            Response<CategoryDTO> response = await _categoriesService.GetOneAsync(id);
 
-            return View(category);
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(response.Result!);
         }
+
+        [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new CreateCategoryDTO());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateCategoryDTO dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var resultado = await _categoriesService.CrearAsync(dto);
-                if (resultado)
-                {
-                    TempData["Exito"] = "Categoría creada correctamente.";
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", "Error al crear la categoría.");
+                return View(dto);
             }
-            return View(dto);
+
+            Response<CreateCategoryDTO> response = await _categoriesService.CreateAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear la categoría.");
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var category = await _categoriesService.ObtenerPorIdAsync(id);
-            if (category == null) return NotFound();
-            var dto = new UpdateCategoryDTO
+            Response<CategoryDTO> response = await _categoriesService.GetOneAsync(id);
+
+            if (!response.IsSuccess)
             {
-                IdCategories = category.IdCategories,
-                Name = category.Name,
-                Description = category.Description,
-                State = category.State
+                TempData["Error"] = response.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            UpdateCategoryDTO dto = new UpdateCategoryDTO
+            {
+                Id = response.Result!.Id,
+                Name = response.Result.Name,
+                Description = response.Result.Description,
+                IsActive = response.Result.IsActive
             };
 
             return View(dto);
@@ -66,38 +96,30 @@ namespace Restaurante.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateCategoryDTO dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var resultado = await _categoriesService.ActualizarAsync(dto);
-                if (resultado)
-                {
-                    TempData["Exito"] = "Categoría actualizada correctamente.";
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", "Error al actualizar la categoría.");
+                return View(dto);
             }
-            return View(dto);
+
+            Response<UpdateCategoryDTO> response = await _categoriesService.UpdateAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al actualizar la categoría.");
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var category = await _categoriesService.ObtenerPorIdAsync(id);
-            if (category == null) return NotFound();
+            Response response = await _categoriesService.DeleteAsync(id);
 
-            return View(category);
-        }
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var resultado = await _categoriesService.EliminarAsync(id);
-            if (resultado)
-            {
-                TempData["Exito"] = "Categoría eliminada correctamente.";
-            }
-            else
-            {
-                TempData["Error"] = "No se puede eliminar la categoría porque tiene platos asociados.";
-            }
+            TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
             return RedirectToAction(nameof(Index));
         }
     }

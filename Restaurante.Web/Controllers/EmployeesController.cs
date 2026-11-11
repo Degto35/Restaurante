@@ -1,38 +1,59 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Employees;
+using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Controllers
 {
     public class EmployeesController : Controller
     {
-        private readonly IEmployeesService _EmployeesService;
+        private readonly IEmployeesService _employeesService;
+        private readonly ISelectListHelper _selectListHelper;
 
-        public EmployeesController(IEmployeesService employeesService)
+        public EmployeesController(IEmployeesService employeesService, ISelectListHelper selectListHelper)
         {
-            _EmployeesService = employeesService;
+            _employeesService = employeesService;
+            _selectListHelper = selectListHelper;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpGet]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            var employees = await _EmployeesService.ObtenerTodosAsync();
-            return View(employees);
+            Response<PaginationResponse<EmployeeDTO>> response = await _employeesService.GetPaginationAsync(request);
+
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(response.Result!);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
-            var employee = await _EmployeesService.ObtenerPorIdAsync(id);
-            if (employee == null) return NotFound();
+            Response<EmployeeDTO> response = await _employeesService.GetOneAsync(id);
 
-            return View(employee);
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(response.Result!);
         }
 
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var dto = new CreateEmployeeDTO
+            CreateEmployeeDTO dto = new CreateEmployeeDTO
             {
-                Roles = await _EmployeesService.ObtenerRolesAsync()
+                Roles = await _selectListHelper.GetRolesSelectListAsync()
             };
+
             return View(dto);
         }
 
@@ -40,34 +61,46 @@ namespace Restaurante.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateEmployeeDTO dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                if (await _EmployeesService.CrearAsync(dto))
-                {
-                    TempData["Exito"] = "Empleado creado correctamente.";
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", "Error al crear el empleado.");
+                dto.Roles = await _selectListHelper.GetRolesSelectListAsync();
+                return View(dto);
             }
 
-            dto.Roles = await _EmployeesService.ObtenerRolesAsync();
-            return View(dto);
+            Response<CreateEmployeeDTO> response = await _employeesService.CreateAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear el empleado.");
+                dto.Roles = await _selectListHelper.GetRolesSelectListAsync();
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var employee = await _EmployeesService.ObtenerPorIdAsync(id);
-            if (employee == null) return NotFound();
+            Response<EmployeeDTO> response = await _employeesService.GetOneAsync(id);
 
-            var dto = new UpdateEmployeeDTO
+            if (!response.IsSuccess)
             {
-                IdEmployee = employee.IdEmployee,
-                Name = employee.Name,
-                Telephone = employee.Telephone,
-                Email = employee.Email,
-                IdRole = employee.IdRole,
-                Role = await _EmployeesService.ObtenerRolesAsync()
+                TempData["Error"] = response.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            UpdateEmployeeDTO dto = new UpdateEmployeeDTO
+            {
+                Id = response.Result!.Id,
+                Name = response.Result.Name,
+                Telephone = response.Result.Telephone,
+                Email = response.Result.Email,
+                RoleId = response.Result.RoleId,
+                Roles = await _selectListHelper.GetRolesSelectListAsync()
             };
+
             return View(dto);
         }
 
@@ -75,37 +108,32 @@ namespace Restaurante.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateEmployeeDTO dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                if (await _EmployeesService.ActualizarAsync(dto))
-                {
-                    TempData["Exito"] = "Empleado actualizado correctamente.";
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", "Error al actualizar el empleado.");
+                dto.Roles = await _selectListHelper.GetRolesSelectListAsync();
+                return View(dto);
             }
 
-            dto.Role = await _EmployeesService.ObtenerRolesAsync();
-            return View(dto);
+            Response<UpdateEmployeeDTO> response = await _employeesService.UpdateAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al actualizar el empleado.");
+                dto.Roles = await _selectListHelper.GetRolesSelectListAsync();
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var empleado = await _EmployeesService.ObtenerPorIdAsync(id);
-            if (empleado == null) return NotFound();
+            Response response = await _employeesService.DeleteAsync(id);
 
-            return View(empleado);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            if (await _EmployeesService.EliminarAsync(id))
-                TempData["Exito"] = "Empleado eliminado correctamente.";
-            else
-                TempData["Error"] = "No se pudo eliminar el empleado.";
-
+            TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
             return RedirectToAction(nameof(Index));
         }
     }

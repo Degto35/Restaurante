@@ -1,13 +1,26 @@
-﻿namespace Restaurante.Web.DTOs.Dishes
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Restaurante.Web.DTOs.Dishes
 {
     public class DishDTO
     {
-        public Guid IdDish { get; set; }
+        public Guid Id { get; set; }
+
+        [Display(Name = "Nombre")]
         public string Name { get; set; } = string.Empty;
+
+        [Display(Name = "Descripción")]
         public string? Description { get; set; }
+
+        [Display(Name = "Precio")]
         public decimal Price { get; set; }
-        public bool State { get; set; }
-        public Guid IdCategories { get; set; }
+
+        [Display(Name = "Estado")]
+        public bool IsActive { get; set; }
+
+        public Guid CategoryId { get; set; }
+
+        [Display(Name = "Categoría")]
         public string CategoryName { get; set; } = string.Empty;
     }
 }

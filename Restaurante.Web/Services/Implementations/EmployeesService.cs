@@ -1,103 +1,81 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.Data;
+using Restaurante.Web.Data.Entities;
 using Restaurante.Web.DTOs.Employees;
-using Restaurante.Web.Entities;
 using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Services.Implementations
 {
-    public class EmployeesService : IEmployeesService
+    public class EmployeesService : CustomQueryableOperationsService, IEmployeesService
     {
         private readonly DataContext _context;
 
-        public EmployeesService(DataContext context)
+        public EmployeesService(DataContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
         }
 
-        public async Task<List<EmployeesDTO>> ObtenerTodosAsync()
+        public async Task<Response<PaginationResponse<EmployeeDTO>>> GetPaginationAsync(PaginationRequest request)
         {
-            return await _context.Employees
-                .Select(e => new EmployeesDTO
-                {
-                    IdEmployee = e.IdEmployee,
-                    Name = e.Name,
-                    Telephone = e.Telephone,
-                    Email = e.Email,
-                    IdRole = e.IdRole,
-                    NameRole = e.Role.NameRole
-                }).ToListAsync();
-        }
-
-        public async Task<EmployeesDTO?> ObtenerPorIdAsync(Guid id)
-        {
-            var employee = await _context.Employees
+            
+            IQueryable<Employee> query = _context.Employees
                 .Include(e => e.Role)
-                .FirstOrDefaultAsync(e => e.IdEmployee == id);
+                .AsQueryable();
 
-            if (employee == null) return null;
-
-            return new EmployeesDTO
+            if (!string.IsNullOrWhiteSpace(request.Filter))
             {
-                IdEmployee = employee.IdEmployee,
-                Name = employee.Name,
-                Telephone = employee.Telephone,
-                Email = employee.Email,
-                IdRole = employee.IdRole,
-                NameRole = employee.Role.NameRole
-            };
+                string filter = request.Filter.ToLower();
+
+                query = query.Where(e => e.Name.ToLower().Contains(filter)
+                                      || (e.Email != null && e.Email.ToLower().Contains(filter))
+                                      || e.Role.Name.ToLower().Contains(filter));
+            }
+
+            query = query.OrderBy(e => e.Name);
+
+            return await GetPagedListAsync<EmployeeDTO, Employee>(request, query);
         }
 
-        public async Task<bool> CrearAsync(CreateEmployeeDTO dto)
+        public async Task<Response<EmployeeDTO>> GetOneAsync(Guid id)
         {
-            var employee = new Employees
+            IQueryable<Employee> query = _context.Employees.Include(e => e.Role);
+
+            return await GetOneAsync<EmployeeDTO, Employee>(id, query);
+        }
+
+        public async Task<Response<CreateEmployeeDTO>> CreateAsync(CreateEmployeeDTO dto)
+        {
+            if (!await _context.Roles.AnyAsync(r => r.Id == dto.RoleId))
             {
-                IdEmployee = Guid.NewGuid(),
-                Name = dto.Name,
-                Telephone = dto.Telephone,
-                Email = dto.Email,
-                IdRole = dto.IdRole
-            };
+                return Response<CreateEmployeeDTO>.Failure("El rol seleccionado no existe.");
+            }
 
-            _context.Employees.Add(employee);
-            return await _context.SaveChangesAsync() > 0;
+            return await CreateAsync<CreateEmployeeDTO, Employee>(dto);
         }
 
-        public async Task<bool> ActualizarAsync(UpdateEmployeeDTO dto)
+        public async Task<Response<UpdateEmployeeDTO>> UpdateAsync(UpdateEmployeeDTO dto)
         {
-            var employee = await _context.Employees.FindAsync(dto.IdEmployee);
-            if (employee == null) return false;
+            if (!await _context.Roles.AnyAsync(r => r.Id == dto.RoleId))
+            {
+                return Response<UpdateEmployeeDTO>.Failure("El rol seleccionado no existe.");
+            }
 
-            employee.Name = dto.Name;
-            employee.Telephone = dto.Telephone;
-            employee.Email = dto.Email;
-            employee.IdRole = dto.IdRole;
-
-            _context.Employees.Update(employee);
-            return await _context.SaveChangesAsync() > 0;
+            return await UpdateAsync<UpdateEmployeeDTO, Employee>(dto, dto.Id);
         }
 
-        public async Task<bool> EliminarAsync(Guid id)
+        public async Task<Response> DeleteAsync(Guid id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return false;
+            bool hasOrders = await _context.Orders.AnyAsync(o => o.EmployeeId == id);
 
-            // TODO: cuando existan Cuentas y Pedidos, validar que el empleado no tenga registros asociados
+            if (hasOrders)
+            {
+                return Response.Failure("No se puede eliminar el empleado porque tiene pedidos asociados.");
+            }
 
-            _context.Employees.Remove(employee);
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<IEnumerable<SelectListItem>> ObtenerRolesAsync()
-        {
-            return await _context.Roles
-                .OrderBy(r => r.NameRole)
-                .Select(r => new SelectListItem
-                {
-                    Value = r.IdRole.ToString(),
-                    Text = r.NameRole
-                }).ToListAsync();
+            return await DeleteAsync<Employee>(id);
         }
     }
 }

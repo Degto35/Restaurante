@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Employees;
 
 namespace Restaurante.Web.Services.Abstractions
 {
     public interface IEmployeesService
     {
-        Task<List<EmployeesDTO>> ObtenerTodosAsync();
-        Task<EmployeesDTO?> ObtenerPorIdAsync(Guid id);
-        Task<bool> CrearAsync(CreateEmployeeDTO dto);
-        Task<bool> ActualizarAsync(UpdateEmployeeDTO dto);
-        Task<bool> EliminarAsync(Guid id);
-        Task<IEnumerable<SelectListItem>> ObtenerRolesAsync();
+        Task<Response<PaginationResponse<EmployeeDTO>>> GetPaginationAsync(PaginationRequest request);
+        Task<Response<EmployeeDTO>> GetOneAsync(Guid id);
+        Task<Response<CreateEmployeeDTO>> CreateAsync(CreateEmployeeDTO dto);
+        Task<Response<UpdateEmployeeDTO>> UpdateAsync(UpdateEmployeeDTO dto);
+        Task<Response> DeleteAsync(Guid id);
     }
 }

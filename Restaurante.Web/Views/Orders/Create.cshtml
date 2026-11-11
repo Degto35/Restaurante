@@ -13,7 +13,7 @@
 
             <div class="form-group mb-3">
                 <label asp-for="DiningTableId" class="control-label"></label>
-                <select asp-for="DiningTableId" class="form-select" asp-items="ViewBag.Tables">
+                <select asp-for="DiningTableId" class="form-select" asp-items="Model.Tables">
                     <option value="">-- Seleccione una mesa --</option>
                 </select>
                 <span asp-validation-for="DiningTableId" class="text-danger"></span>
@@ -21,7 +21,7 @@
 
             <div class="form-group mb-3">
                 <label asp-for="EmployeeId" class="control-label"></label>
-                <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees">
+                <select asp-for="EmployeeId" class="form-select" asp-items="Model.Employees">
                     <option value="">-- Seleccione un mesero --</option>
                 </select>
                 <span asp-validation-for="EmployeeId" class="text-danger"></span>

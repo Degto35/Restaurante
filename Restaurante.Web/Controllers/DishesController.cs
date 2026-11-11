@@ -1,112 +1,141 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Dishes;
+using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Controllers
 {
     public class DishesController : Controller
     {
-        private readonly IDishesService _DishesService;
-        private readonly ICategoriesService _CategoriesService;
+        private readonly IDishesService _dishesService;
+        private readonly ISelectListHelper _selectListHelper;
 
-        public DishesController(IDishesService dishesService, ICategoriesService categoriesService)
+        public DishesController(IDishesService dishesService, ISelectListHelper selectListHelper)
         {
-            _DishesService = dishesService;
-            _CategoriesService = categoriesService;
+            _dishesService = dishesService;
+            _selectListHelper = selectListHelper;
         }
-        public async Task<IActionResult> Index()
+
+        [HttpGet]
+        public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
-            var dishes = await _DishesService.ObtenerTodosAsync();
-            return View(dishes);
+            Response<PaginationResponse<DishDTO>> response = await _dishesService.GetPaginationAsync(request);
+
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(response.Result!);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
+            Response<DishDTO> response = await _dishesService.GetOneAsync(id);
+
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(response.Result!);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            await CargarCategoriasEnViewBag();
-            return View();
+            CreateDishDTO dto = new CreateDishDTO
+            {
+                Categories = await _selectListHelper.GetCategoriesSelectListAsync()
+            };
+
+            return View(dto);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateDishDTO dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var resultado = await _DishesService.CrearAsync(dto);
-                if (resultado)
-                {
-                    TempData["Exito"] = "Plato creado correctamente.";
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", "Error al crear el plato.");
+                dto.Categories = await _selectListHelper.GetCategoriesSelectListAsync();
+                return View(dto);
             }
-            await CargarCategoriasEnViewBag();
-            return View(dto);
+
+            Response<CreateDishDTO> response = await _dishesService.CreateAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al crear el plato.");
+                dto.Categories = await _selectListHelper.GetCategoriesSelectListAsync();
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var dish = await _DishesService.ObtenerPorIdAsync(id);
-            if (dish == null) return NotFound();
+            Response<DishDTO> response = await _dishesService.GetOneAsync(id);
 
-            var dto = new UpdateDishDTO
+            if (!response.IsSuccess)
             {
-                IdDish = dish.IdDish,
-                Name = dish.Name,
-                Description = dish.Description,
-                Price = dish.Price,
-                IdCategories = dish.IdCategories,
-                State = dish.State
+                TempData["Error"] = response.Message;
+                return RedirectToAction(nameof(Index));
+            }
+
+            UpdateDishDTO dto = new UpdateDishDTO
+            {
+                Id = response.Result!.Id,
+                Name = response.Result.Name,
+                Description = response.Result.Description,
+                Price = response.Result.Price,
+                CategoryId = response.Result.CategoryId,
+                IsActive = response.Result.IsActive,
+                Categories = await _selectListHelper.GetCategoriesSelectListAsync(response.Result.CategoryId)
             };
 
-            await CargarCategoriasEnViewBag(dto.IdCategories);
             return View(dto);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateDishDTO dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var resultado = await _DishesService.ActualizarAsync(dto);
-                if (resultado)
-                {
-                    TempData["Exito"] = "Plato actualizado correctamente.";
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", "Error al actualizar el plato.");
+                dto.Categories = await _selectListHelper.GetCategoriesSelectListAsync(dto.CategoryId);
+                return View(dto);
             }
 
-            await CargarCategoriasEnViewBag(dto.IdCategories);
-            return View(dto);
-        }
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var dish = await _DishesService.ObtenerPorIdAsync(id);
-            if (dish == null) return NotFound();
+            Response<UpdateDishDTO> response = await _dishesService.UpdateAsync(dto);
 
-            return View(dish);
-        }
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var resultado = await _DishesService.EliminarAsync(id);
-            if (resultado)
+            if (!response.IsSuccess)
             {
-                TempData["Exito"] = "Plato eliminado correctamente.";
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al actualizar el plato.");
+                dto.Categories = await _selectListHelper.GetCategoriesSelectListAsync(dto.CategoryId);
+                return View(dto);
             }
-            else
-            {
-                TempData["Error"] = "No se puede eliminar el plato porque está asociado a un pedido.";
-            }
+
+            TempData["Exito"] = response.Message;
             return RedirectToAction(nameof(Index));
         }
-        private async Task CargarCategoriasEnViewBag(Guid
-            ? idCategoriaSeleccionada = null)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var categories = await _CategoriesService.ObtenerTodasAsync();
-            ViewBag.Categorias = new SelectList(categories, "IdCategories", "Name", idCategoriaSeleccionada);
+            Response response = await _dishesService.DeleteAsync(id);
+
+            TempData[response.IsSuccess ? "Exito" : "Error"] = response.Message;
+            return RedirectToAction(nameof(Index));
         }
     }
 }

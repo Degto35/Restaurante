@@ -5,15 +5,18 @@ namespace Restaurante.Web.DTOs.Categories
     public class UpdateCategoryDTO
     {
         [Required]
-        public Guid IdCategories { get; set; }
+        public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        [StringLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres")]
+        [Display(Name = "Nombre")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
+        [MaxLength(50, ErrorMessage = "El campo {0} debe tener como máximo {1} caracteres.")]
         public string Name { get; set; } = string.Empty;
 
-        [StringLength(200)]
+        [Display(Name = "Descripción")]
+        [MaxLength(200, ErrorMessage = "El campo {0} debe tener como máximo {1} caracteres.")]
         public string? Description { get; set; }
 
-        public bool State { get; set; }
+        [Display(Name = "Activa")]
+        public bool IsActive { get; set; }
     }
 }

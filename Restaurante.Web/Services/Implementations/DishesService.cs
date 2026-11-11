@@ -1,97 +1,104 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Restaurante.Web.Core;
+using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.Data;
-using Restaurante.Web.DTOs.Dishes;
-using Restaurante.Web.Entities;
 using Restaurante.Web.Data.Entities;
+using Restaurante.Web.DTOs.Dishes;
 using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Services.Implementations
 {
-    public class DishesService : IDishesService
+    public class DishesService : CustomQueryableOperationsService, IDishesService
     {
         private readonly DataContext _context;
 
-        public DishesService(DataContext context)
+        public DishesService(DataContext context, IMapper mapper) : base(context, mapper)
         {
             _context = context;
         }
 
-        public async Task<List<DishDTO>> ObtenerTodosAsync()
+        public async Task<Response<PaginationResponse<DishDTO>>> GetPaginationAsync(PaginationRequest request)
         {
-            return await _context.Dishes
-                .Include(d => d.Category) // ¡IMPORTANTE! Trae los datos de la categoría
-                .Select(d => new DishDTO
-                {
-                    IdDish = d.IdDish,
-                    Name = d.Name,
-                    Description = d.Description,
-                    Price = d.Price,
-                    State = d.State,
-                    IdCategories = d.IdCategories,
-                    CategoryName = d.Category.Name // Se llena gracias al Include
-                }).ToListAsync();
-        }
+            
+            IQueryable<Dish> query = _context.Dishes.Include(d => d.Category);
 
-        public async Task<DishDTO?> ObtenerPorIdAsync(Guid id)
-        {
-            var dishes = await _context.Dishes
-                .Include(p => p.Category)
-                .FirstOrDefaultAsync(p => p.IdDish == id);
-
-            if (dishes == null) return null;
-
-            return new DishDTO
+            if (!string.IsNullOrWhiteSpace(request.Filter))
             {
-                IdDish = dishes.IdDish,
-                Name = dishes.Name,
-                Description = dishes.Description,
-                Price = dishes.Price,
-                State = dishes.State,
-                IdCategories = dishes.IdCategories,
-                CategoryName = dishes.Category.Name
-            };
+                string filter = request.Filter.ToLower();
+
+                query = query.Where(d => d.Name.ToLower().Contains(filter)
+                                      || (d.Description != null && d.Description.ToLower().Contains(filter))
+                                      || d.Category.Name.ToLower().Contains(filter));
+            }
+
+            query = query.OrderBy(d => d.Name);
+
+            return await GetPagedListAsync<DishDTO, Dish>(request, query);
         }
 
-        public async Task<bool> CrearAsync(CreateDishDTO dto)
+        public async Task<Response<DishDTO>> GetOneAsync(Guid id)
         {
-            var dishes = new Dishes
+            return await GetOneAsync<DishDTO, Dish>(id, _context.Dishes.Include(d => d.Category));
+        }
+
+        public async Task<Response<CreateDishDTO>> CreateAsync(CreateDishDTO dto)
+        {
+            Response check = await ValidateCategoryAsync(dto.CategoryId, currentCategoryId: null);
+
+            if (!check.IsSuccess)
             {
-                Name = dto.Name,
-                Description = dto.Description,
-                Price = dto.Price,
-                IdCategories = dto.IdCategories,
-                State = true
-            };
+                return Response<CreateDishDTO>.Failure(check.Message!);
+            }
 
-            _context.Dishes.Add(dishes);
-            return await _context.SaveChangesAsync() > 0;
+            return await CreateAsync<CreateDishDTO, Dish>(dto);
         }
 
-        public async Task<bool> ActualizarAsync(UpdateDishDTO dto)
+        public async Task<Response<UpdateDishDTO>> UpdateAsync(UpdateDishDTO dto)
         {
-            var dishes = await _context.Dishes.FindAsync(dto.IdDish);
-            if (dishes == null) return false;
+            
+            Guid? currentCategoryId = await _context.Dishes
+                .Where(d => d.Id == dto.Id)
+                .Select(d => (Guid?)d.CategoryId)
+                .FirstOrDefaultAsync();
 
-            dishes.Name = dto.Name;
-            dishes.Description = dto.Description;
-            dishes.Price = dto.Price;
-            dishes.IdCategories = dto.IdCategories;
-            dishes.State = dto.State;
+            Response check = await ValidateCategoryAsync(dto.CategoryId, currentCategoryId);
 
-            _context.Dishes.Update(dishes);
-            return await _context.SaveChangesAsync() > 0;
+            if (!check.IsSuccess)
+            {
+                return Response<UpdateDishDTO>.Failure(check.Message!);
+            }
+
+            return await UpdateAsync<UpdateDishDTO, Dish>(dto, dto.Id);
         }
 
-        public async Task<bool> EliminarAsync(Guid id)
+        public async Task<Response> DeleteAsync(Guid id)
         {
-            var dishes = await _context.Dishes.FindAsync(id);
-            if (dishes == null) return false;
+            bool isInOrders = await _context.OrderDetails.AnyAsync(d => d.DishId == id);
 
-            //var estaEnPedido = await _context.DetallesPedido.AnyAsync(d => d.IdDish == id);
-            //if (estaEnPedido) return false;
+            if (isInOrders)
+            {
+                return Response.Failure("No se puede eliminar el plato porque está asociado a pedidos. Puede desactivarlo en su lugar.");
+            }
 
-            _context.Dishes.Remove(dishes);
-            return await _context.SaveChangesAsync() > 0;
+            return await DeleteAsync<Dish>(id);
+        }
+
+        private async Task<Response> ValidateCategoryAsync(Guid categoryId, Guid? currentCategoryId)
+        {
+            Category? category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId);
+
+            if (category is null)
+            {
+                return Response.Failure("La categoría seleccionada no existe.");
+            }
+
+            if (!category.IsActive && categoryId != currentCategoryId)
+            {
+                return Response.Failure("No se puede asignar una categoría inactiva.");
+            }
+
+            return Response.Success();
         }
     }
 }

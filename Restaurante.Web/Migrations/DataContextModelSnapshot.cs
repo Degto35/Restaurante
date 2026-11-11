@@ -22,9 +22,58 @@ namespace Restaurante.Web.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Bill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentMethod")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Bills");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("Restaurante.Web.Data.Entities.DiningTable", b =>
                 {
-                    b.Property<Guid>("IdTable")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -37,9 +86,69 @@ namespace Restaurante.Web.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.HasKey("IdTable");
+                    b.HasKey("Id");
 
                     b.ToTable("DiningTables");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Dish", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Dishes");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Employee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Telephone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
@@ -96,71 +205,10 @@ namespace Restaurante.Web.Migrations
                     b.ToTable("OrderDetails");
                 });
 
-            modelBuilder.Entity("Restaurante.Web.Entities.Categories", b =>
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Role", b =>
                 {
-                    b.Property<Guid>("IdCategories")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("State")
-                        .HasColumnType("bit");
-
-                    b.HasKey("IdCategories");
-
-                    b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Restaurante.Web.Entities.Dishes", b =>
-                {
-                    b.Property<Guid>("IdDish")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<Guid>("IdCategories")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<bool>("State")
-                        .HasColumnType("bit");
-
-                    b.HasKey("IdDish");
-
-                    b.HasIndex("IdCategories");
-
-                    b.ToTable("Dishes");
-                });
-
-            modelBuilder.Entity("Restaurante.Web.Entities.Employees", b =>
-                {
-                    b.Property<Guid>("IdEmployee")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid>("IdRole")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -168,31 +216,42 @@ namespace Restaurante.Web.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 
-                    b.Property<string>("Telephone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("IdEmployee");
-
-                    b.HasIndex("IdRole");
-
-                    b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("Restaurante.Web.Entities.Role", b =>
-                {
-                    b.Property<Guid>("IdRole")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("NameRole")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.HasKey("IdRole");
+                    b.HasKey("Id");
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Bill", b =>
+                {
+                    b.HasOne("Restaurante.Web.Data.Entities.Order", "Order")
+                        .WithOne("Bill")
+                        .HasForeignKey("Restaurante.Web.Data.Entities.Bill", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Dish", b =>
+                {
+                    b.HasOne("Restaurante.Web.Data.Entities.Category", "Category")
+                        .WithMany("Dishes")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Employee", b =>
+                {
+                    b.HasOne("Restaurante.Web.Data.Entities.Role", "Role")
+                        .WithMany("Employees")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
@@ -203,7 +262,7 @@ namespace Restaurante.Web.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Restaurante.Web.Entities.Employees", "Employee")
+                    b.HasOne("Restaurante.Web.Data.Entities.Employee", "Employee")
                         .WithMany("Orders")
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -216,7 +275,7 @@ namespace Restaurante.Web.Migrations
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Restaurante.Web.Entities.Dishes", "Dish")
+                    b.HasOne("Restaurante.Web.Data.Entities.Dish", "Dish")
                         .WithMany()
                         .HasForeignKey("DishId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -233,26 +292,9 @@ namespace Restaurante.Web.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Restaurante.Web.Entities.Dishes", b =>
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Category", b =>
                 {
-                    b.HasOne("Restaurante.Web.Entities.Categories", "Category")
-                        .WithMany("Dishes")
-                        .HasForeignKey("IdCategories")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Restaurante.Web.Entities.Employees", b =>
-                {
-                    b.HasOne("Restaurante.Web.Entities.Role", "Role")
-                        .WithMany("Employees")
-                        .HasForeignKey("IdRole")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Role");
+                    b.Navigation("Dishes");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.DiningTable", b =>
@@ -260,22 +302,19 @@ namespace Restaurante.Web.Migrations
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
-                {
-                    b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("Restaurante.Web.Entities.Categories", b =>
-                {
-                    b.Navigation("Dishes");
-                });
-
-            modelBuilder.Entity("Restaurante.Web.Entities.Employees", b =>
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Employee", b =>
                 {
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("Restaurante.Web.Entities.Role", b =>
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
+                {
+                    b.Navigation("Bill");
+
+                    b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Role", b =>
                 {
                     b.Navigation("Employees");
                 });
