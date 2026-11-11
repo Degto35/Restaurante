@@ -50,9 +50,9 @@ namespace Restaurante.Web.Services.Implementations
 
         public async Task<Response> DeleteAsync(Guid id)
         {
-            bool hasEmployees = await _context.Employees.AnyAsync(e => e.RoleId == id);
+            bool hasUsers = await _context.Users.AnyAsync(u => u.RoleId == id);
 
-            if (hasEmployees)
+            if (hasUsers)
             {
                 return Response.Failure("No se puede eliminar el rol porque tiene empleados asociados.");
             }

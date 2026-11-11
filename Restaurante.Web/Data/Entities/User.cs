@@ -22,7 +22,7 @@ namespace Restaurante.Web.Data.Entities
 
         public Role? Role { get; set; }
 
-        //public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
 
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";

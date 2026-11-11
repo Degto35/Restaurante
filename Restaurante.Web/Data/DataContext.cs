@@ -16,7 +16,6 @@ namespace Restaurante.Web.Data
         public DbSet<Role> RestauranteRoles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
-        public DbSet<Employee> Employees { get; set; }
         public DbSet<DiningTable> DiningTables { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
@@ -34,12 +33,6 @@ namespace Restaurante.Web.Data
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Employee>()
-                .HasOne(e => e.Role)
-                .WithMany(r => r.Employees)
-                .HasForeignKey(e => e.RoleId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.DiningTable)
                 .WithMany(t => t.Orders)
@@ -47,9 +40,9 @@ namespace Restaurante.Web.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.Employee)
-                .WithMany(e => e.Orders)
-                .HasForeignKey(o => o.EmployeeId)
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OrderDetail>()

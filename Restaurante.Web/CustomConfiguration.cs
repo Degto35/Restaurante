@@ -34,7 +34,6 @@ namespace Restaurante.Web
             builder.Services.AddScoped<ICategoriesService, CategoriesService>();
             builder.Services.AddScoped<IDishesService, DishesService>();
             builder.Services.AddScoped<IRolesService, RolesService>();
-            builder.Services.AddScoped<IEmployeesService, EmployeesService>();
             builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
             builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();

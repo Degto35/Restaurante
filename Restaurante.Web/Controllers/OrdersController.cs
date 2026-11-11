@@ -130,7 +130,7 @@ namespace Restaurante.Web.Controllers
         private async Task FillListsAsync(CreateOrderDTO dto)
         {
             dto.Tables = await _selectListHelper.GetAvailableTablesSelectListAsync();
-            dto.Employees = await _selectListHelper.GetEmployeesSelectListAsync();
+            dto.Users = await _selectListHelper.GetUsersSelectListAsync();
         }
     }
 }

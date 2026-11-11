@@ -24,7 +24,7 @@ namespace Restaurante.Web.Services.Implementations
         private IQueryable<Order> OrdersWithRelations()
             => _context.Orders
                 .Include(o => o.DiningTable)
-                .Include(o => o.Employee)
+                .Include(o => o.User)
                 .Include(o => o.Bill)
                 .Include(o => o.OrderDetails).ThenInclude(d => d.Dish);
 
@@ -40,8 +40,8 @@ namespace Restaurante.Web.Services.Implementations
             {
                 string filter = request.Filter.ToLower();
 
-                query = query.Where(o => o.Employee.Name.ToLower().Contains(filter)
-                                      || o.DiningTable.Number.ToString().Contains(filter));
+                query = query.Where(o => (o.User.FirstName + " " + o.User.LastName).ToLower().Contains(filter)
+                       || o.DiningTable.Number.ToString().Contains(filter));
             }
 
             query = query.OrderByDescending(o => o.Date);
@@ -69,9 +69,9 @@ namespace Restaurante.Web.Services.Implementations
                     return Response<OrderDTO>.Failure("La mesa seleccionada no está disponible.");
                 }
 
-                bool employeeExists = await _context.Employees.AnyAsync(e => e.Id == dto.EmployeeId);
+                bool userExists = await _context.Users.AnyAsync(u => u.Id == dto.UserId);
 
-                if (!employeeExists)
+                if (!userExists)
                 {
                     return Response<OrderDTO>.Failure("El mesero seleccionado no existe.");
                 }
@@ -79,7 +79,7 @@ namespace Restaurante.Web.Services.Implementations
                 Order order = new()
                 {
                     DiningTableId = dto.DiningTableId,
-                    EmployeeId = dto.EmployeeId,
+                    UserId = dto.UserId,
                     Date = DateTime.Now,
                     Status = OrderStatus.Pending
                 };

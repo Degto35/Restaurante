@@ -17,8 +17,8 @@ namespace Restaurante.Web.Data.Entities
         public Guid DiningTableId { get; set; }
         public DiningTable DiningTable { get; set; } = null!;
 
-        public Guid EmployeeId { get; set; }
-        public Employee Employee { get; set; } = null!;   
+        public string UserId { get; set; } = string.Empty;   
+        public User User { get; set; } = null!;
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
