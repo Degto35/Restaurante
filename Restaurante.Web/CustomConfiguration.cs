@@ -35,6 +35,7 @@ namespace Restaurante.Web
             builder.Services.AddScoped<ICategoriesService, CategoriesService>();
             builder.Services.AddScoped<IDishesService, DishesService>();
             builder.Services.AddScoped<IRolesService, RolesService>();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IAccountService, AccountService>();
             builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();

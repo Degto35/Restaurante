@@ -7,5 +7,7 @@ namespace Restaurante.Web.Services.Abstractions
     {
         Task<Response> LoginAsync(LoginDTO dto);
         Task LogoutAsync();
+        Task<Response<ProfileDTO>> GetProfileAsync();
+        Task<Response> UpdateProfileAsync(ProfileDTO dto);
     }
 }

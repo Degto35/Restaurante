@@ -4,6 +4,7 @@ using Restaurante.Web.Core;
 using Restaurante.Web.DTOs.Account;
 using Restaurante.Web.Services.Abstractions;
 
+
 namespace Restaurante.Web.Controllers
 {
     public class AccountController : Controller
@@ -67,12 +68,63 @@ namespace Restaurante.Web.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-    
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            Response<ProfileDTO> response = await _accountService.GetProfileAsync();
+
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(response.Result!);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(ProfileDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                await FillReadOnlyFieldsAsync(dto);
+                return View(dto);
+            }
+
+            Response response = await _accountService.UpdateProfileAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message!);
+                await FillReadOnlyFieldsAsync(dto);
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Profile));
+        }
+
+        private async Task FillReadOnlyFieldsAsync(ProfileDTO dto)
+        {
+            Response<ProfileDTO> current = await _accountService.GetProfileAsync();
+
+            if (current.IsSuccess)
+            {
+                dto.Email = current.Result!.Email;
+                dto.RoleName = current.Result.RoleName;
+            }
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View();
         }
+
+
     }
 }
