@@ -1,0 +1,59 @@
+@model Restaurante.Web.DTOs.Accounts.LoginDTO
+
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+
+            <div class="card shadow">
+                <div class="card-body">
+
+                    <h2 class="text-center mb-4">
+                        Restaurante
+                    </h2>
+
+                    <h4 class="text-center">
+                        Iniciar sesión
+                    </h4>
+
+                    <form asp-action="Login" method="post">
+
+                        <div asp-validation-summary="All"
+                             class="text-danger">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Usuario
+                            </label>
+
+                            <input asp-for="NombreUsuario"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Contraseña
+                            </label>
+
+                            <input asp-for="Password"
+                                   type="password"
+                                   class="form-control" />
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Ingresar
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

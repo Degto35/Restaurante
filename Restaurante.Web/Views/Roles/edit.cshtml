@@ -1,5 +1,74 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@model Restaurante.Web.DTOs.Roles.ActualizarRolDTO
+
 @{
+    ViewData["Title"] = "Editar rol";
 }
+
+<div class="container mt-4">
+
+    <h2>Editar rol</h2>
+
+    <form asp-action="Edit" method="post">
+
+        <input asp-for="Id_Rol"
+               type="hidden" />
+
+        <div asp-validation-summary="All"
+             class="text-danger">
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Nombre del rol
+            </label>
+
+            <input asp-for="Nombre"
+                   class="form-control" />
+
+        </div>
+
+        <div class="form-check mb-3">
+
+            <input asp-for="Activo"
+                   class="form-check-input" />
+
+            <label class="form-check-label">
+                Rol activo
+            </label>
+
+        </div>
+
+        <h4>Permisos</h4>
+
+        @foreach (var permiso in ViewBag.Permisos)
+        {
+            bool seleccionado =
+                Model.PermisosSeleccionados.Contains(
+                    permiso.Id_Permiso);
+
+            <div class="form-check">
+
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="PermisosSeleccionados"
+                       value="@permiso.Id_Permiso"
+                       checked="@seleccionado" />
+
+                <label class="form-check-label">
+                    @permiso.Nombre
+                </label>
+
+            </div>
+        }
+
+        <br />
+
+        <button type="submit"
+                class="btn btn-success">
+            Guardar cambios
+        </button>
+
+    </form>
+
+</div>

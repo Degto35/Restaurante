@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Restaurante.Web.Models;
 using System.Diagnostics;
 
 namespace Restaurante.Web.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         public IActionResult Index()
@@ -16,10 +18,19 @@ namespace Restaurante.Web.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        [ResponseCache(
+            Duration = 0,
+            Location = ResponseCacheLocation.None,
+            NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(
+                new ErrorViewModel
+                {
+                    RequestId =
+                        Activity.Current?.Id
+                        ?? HttpContext.TraceIdentifier
+                });
         }
     }
 }

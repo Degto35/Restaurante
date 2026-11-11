@@ -1,5 +1,80 @@
-ï»¿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@model IEnumerable<Restaurante.Web.Models.Usuario>
+
 @{
+    ViewData["Title"] = "Usuarios";
 }
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h2>Usuarios</h2>
+
+        @if (User.HasClaim("Permission", "Usuarios.Crear")
+             || User.IsInRole("Administrador"))
+        {
+            <a asp-action="Create"
+               class="btn btn-primary">
+                Crear usuario
+            </a>
+        }
+
+    </div>
+
+    <table class="table table-bordered table-striped">
+
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        @foreach (var usuario in Model)
+        {
+            <tr>
+                <td>@usuario.Nombre</td>
+                <td>@usuario.Email</td>
+                <td>@usuario.Telefono</td>
+                <td>@usuario.Rol?.Nombre</td>
+
+                <td>
+                    @if (usuario.Activo)
+                    {
+                        <span class="badge bg-success">
+                            Activo
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            Inactivo
+                        </span>
+                    }
+                </td>
+
+                <td>
+                    @if (User.HasClaim("Permission", "Usuarios.Editar")
+                         || User.IsInRole("Administrador"))
+                    {
+                        <a asp-action="Edit"
+                           asp-route-id="@usuario.Id_Usuario"
+                           class="btn btn-sm btn-warning">
+                            Editar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+
+        </tbody>
+
+    </table>
+
+</div>

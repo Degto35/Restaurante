@@ -1,5 +1,82 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@model IEnumerable<Restaurante.Web.Models.Rol>
+
 @{
+    ViewData["Title"] = "Roles";
 }
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between mb-3">
+
+        <h2>Roles</h2>
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+            Crear rol
+        </a>
+
+    </div>
+
+    <table class="table table-bordered">
+
+        <thead>
+            <tr>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Permisos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        @foreach (var rol in Model)
+        {
+            <tr>
+
+                <td>
+                    @rol.Nombre
+                </td>
+
+                <td>
+                    @if (rol.Activo)
+                    {
+                        <span class="badge bg-success">
+                            Activo
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            Inactivo
+                        </span>
+                    }
+                </td>
+
+                <td>
+                    @foreach (var permiso in rol.RolePermissions)
+                    {
+                        <span class="badge bg-secondary me-1">
+                            @permiso.Permission?.Nombre
+                        </span>
+                    }
+                </td>
+
+                <td>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@rol.Id_Rol"
+                       class="btn btn-warning btn-sm">
+                        Editar
+                    </a>
+
+                </td>
+
+            </tr>
+        }
+
+        </tbody>
+
+    </table>
+
+</div>

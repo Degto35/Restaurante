@@ -1,6 +1,14 @@
-﻿namespace Restaurante.Web.Controllers
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Restaurante.Web.Controllers
 {
-    public class PlatosController
+    [Authorize]
+    public class PlatosController : Controller
     {
+        public IActionResult Index()
+        {
+            return View();
+        }
     }
 }

@@ -1,0 +1,42 @@
+﻿@model Restaurante.Web.Models.Plato
+
+<h2>Eliminar Plato</h2>
+
+<div class="alert alert-warning">
+    ¿Estás seguro de que deseas eliminar este plato?
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Nombre</dt>
+    <dd class="col-sm-9">@Model.Nombre</dd>
+
+    <dt class="col-sm-3">Descripción</dt>
+    <dd class="col-sm-9">@Model.Descripcion</dd>
+
+    <dt class="col-sm-3">Precio</dt>
+    <dd class="col-sm-9">@Model.Precio.ToString("C")</dd>
+
+    <dt class="col-sm-3">Categoría</dt>
+    <dd class="col-sm-9">@Model.Categorias?.Nombre</dd>
+</dl>
+
+@if (Model.DetallesPedido.Any())
+{
+    <div class="alert alert-danger">
+        Este plato tiene pedidos asociados y no se puede eliminar.
+    </div>
+}
+else
+{
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id_Plato" />
+
+        <button type="submit" class="btn btn-danger">
+            Confirmar eliminación
+        </button>
+    </form>
+}
+
+<a asp-action="Index" class="btn btn-secondary">
+    Volver
+</a>

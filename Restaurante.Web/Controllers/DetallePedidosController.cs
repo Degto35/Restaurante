@@ -1,6 +1,14 @@
-﻿namespace Restaurante.Web.Controllers
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Restaurante.Web.Controllers
 {
-    public class DetallePedidosController
+    [Authorize]
+    public class DetallePedidosController : Controller
     {
+        public IActionResult Index()
+        {
+            return View();
+        }
     }
 }

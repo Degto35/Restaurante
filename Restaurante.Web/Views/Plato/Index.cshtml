@@ -1,0 +1,61 @@
+﻿@model IEnumerable<Restaurante.Web.Models.Plato>
+
+@{
+    ViewData["Title"] = "Platos";
+}
+
+<h2>Gestión de Platos</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Agregar plato
+    </a>
+</p>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Disponible</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var plato in Model)
+        {
+            <tr>
+                <td>@plato.Nombre</td>
+                <td>@plato.Descripcion</td>
+                <td>@plato.Categorias?.Nombre</td>
+                <td>@plato.Precio.ToString("C")</td>
+                <td>
+                    @(plato.Disponible ? "Sí" : "No")
+                </td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@plato.Id_Plato"
+                       class="btn btn-warning btn-sm">
+                        Editar
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@plato.Id_Plato"
+                       class="btn btn-danger btn-sm">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

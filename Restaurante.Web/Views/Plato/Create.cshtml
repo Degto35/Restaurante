@@ -1,0 +1,59 @@
+﻿@model Restaurante.Web.Models.Plato
+
+<h2>Registrar Plato</h2>
+
+<form asp-action="Create" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label">
+            Nombre del plato
+        </label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Descripcion" class="form-label">
+            Descripción
+        </label>
+        <textarea asp-for="Descripcion" class="form-control"></textarea>
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Precio" class="form-label">
+            Precio
+        </label>
+        <input asp-for="Precio" type="number"
+               step="0.01" min="0.01" class="form-control" />
+        <span asp-validation-for="Precio" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Id_Categoria" class="form-label">
+            Categoría
+        </label>
+        <select asp-for="Id_Categoria"
+                asp-items="ViewBag.Categorias"
+                class="form-select">
+            <option value="">Seleccione una categoría</option>
+        </select>
+        <span asp-validation-for="Id_Categoria" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="Disponible" class="form-check-input" />
+        <label asp-for="Disponible" class="form-check-label">
+            Disponible
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Guardar plato
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Volver
+    </a>
+
+</form>
