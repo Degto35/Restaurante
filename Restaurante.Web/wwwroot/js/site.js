@@ -1,4 +1,6 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
+﻿// Bootstrap toasts do not show themselves: this finds the ones the server rendered and shows them.
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.app-toast').forEach(function (element) {
+        bootstrap.Toast.getOrCreateInstance(element).show();
+    });
+});

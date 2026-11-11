@@ -14,19 +14,31 @@
 
 <partial name="_Alerts" />
 
-<div class="text-center my-5">
-    <h1 class="display-4">Sabor &amp; Tradición</h1>
-    <p class="lead text-muted">Bienvenido, @name</p>
-</div>
+<section class="hero mb-5">
+    <p class="eyebrow mb-2">Cocina con historia</p>
+    <h1>Sabor &amp; Tradición</h1>
+    <p class="lead mb-4">Bienvenido@(string.IsNullOrWhiteSpace(name) ? "" : ", " + name)</p>
+
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+        @if (canOrders)
+        {
+            <a asp-controller="Orders" asp-action="Index" class="btn btn-warning btn-lg">Ver pedidos</a>
+        }
+        @if (canTables)
+        {
+            <a asp-controller="DiningTables" asp-action="Index" class="btn btn-outline-light btn-lg">Ver mesas</a>
+        }
+    </div>
+</section>
 
 <div class="row g-4">
     @if (canCategories || canDishes)
     {
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card module-card h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Menú</h5>
-                    <p class="card-text">Categorías y platos que ofrece el restaurante.</p>
+                    <p class="card-text text-muted">Categorías y platos que ofrece el restaurante.</p>
                     @if (canCategories)
                     {
                         <a asp-controller="Categories" asp-action="Index" class="btn btn-primary">Categorías</a>
@@ -43,10 +55,10 @@
     @if (canTables || canOrders)
     {
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card module-card h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Salón</h5>
-                    <p class="card-text">Mesas y pedidos del día.</p>
+                    <p class="card-text text-muted">Mesas y pedidos del día.</p>
                     @if (canTables)
                     {
                         <a asp-controller="DiningTables" asp-action="Index" class="btn btn-primary">Mesas</a>
@@ -63,10 +75,10 @@
     @if (canUsers || canRoles)
     {
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card module-card h-100 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title">Administración</h5>
-                    <p class="card-text">Usuarios, roles y permisos.</p>
+                    <p class="card-text text-muted">Usuarios, roles y permisos.</p>
                     @if (canUsers)
                     {
                         <a asp-controller="Users" asp-action="Index" class="btn btn-primary">Usuarios</a>

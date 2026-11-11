@@ -1,14 +1,26 @@
-﻿@if (TempData["Exito"] != null)
+﻿@if (TempData["Exito"] != null || TempData["Error"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Exito"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="toast-container position-fixed top-0 end-0 p-3 app-toasts">
+        @if (TempData["Exito"] != null)
+        {
+            <div class="toast app-toast app-toast-success" role="status" aria-live="polite" aria-atomic="true" data-bs-delay="5000">
+                <div class="d-flex">
+                    <div class="toast-icon">&#10003;</div>
+                    <div class="toast-body">@TempData["Exito"]</div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="toast app-toast app-toast-error" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="8000">
+                <div class="d-flex">
+                    <div class="toast-icon">&#10005;</div>
+                    <div class="toast-body">@TempData["Error"]</div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+            </div>
+        }
     </div>
 }

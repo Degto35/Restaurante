@@ -1,31 +1,403 @@
+/* ===== Tokens: the whole look comes from these colors ===== */
+:root {
+    --ink: #1c1814; /* warm near-black */
+    --ink-soft: #2b251e;
+    --gold: #b8975a;
+    --gold-deep: #8f7036;
+    --cream: #faf7f2;
+    --sand: #f3ece0;
+    --line: #e6dccb;
+    --wine: #7a1f2b;
+    --forest: #3f5e4a;
+    --bs-body-font-family: 'Lato', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --bs-body-bg: var(--cream);
+    --bs-body-color: #2b2620;
+    --bs-border-color: var(--line);
+    --bs-link-color-rgb: 143, 112, 54;
+    --bs-link-hover-color-rgb: 122, 31, 43;
+}
+
 html {
-  font-size: 14px;
+    font-size: 15px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+h1, h2, h3, h4, h5 {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-weight: 700;
+    color: var(--ink);
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+h1 {
+    margin-bottom: 1.25rem;
 }
 
-body {
-  margin-bottom: 60px;
+/* ===== Navbar ===== */
+.app-navbar {
+    background: var(--ink);
+    border-bottom: 2px solid var(--gold);
+    padding-top: .6rem;
+    padding-bottom: .6rem;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+    .app-navbar .navbar-brand {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.5rem;
+        color: var(--gold);
+        letter-spacing: .04em;
+    }
+
+        .app-navbar .navbar-brand:hover {
+            color: #d9bd85;
+        }
+
+    .app-navbar .nav-link {
+        color: rgba(255, 255, 255, .78);
+        text-transform: uppercase;
+        font-size: .78rem;
+        letter-spacing: .12em;
+        padding: .5rem .9rem;
+    }
+
+        .app-navbar .nav-link:hover,
+        .app-navbar .nav-link:focus {
+            color: var(--gold);
+        }
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: .9rem;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.btn-logout {
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    font-size: .72rem;
+    padding: .4rem .9rem;
+}
+
+    .btn-logout:hover {
+        background: var(--gold);
+        color: var(--ink);
+    }
+
+/* ===== Layout and footer ===== */
+.app-footer {
+    background: var(--ink);
+    color: rgba(255, 255, 255, .6);
+    border-top: 2px solid var(--gold);
+    font-size: .85rem;
+    letter-spacing: .06em;
+}
+
+    .app-footer .brand {
+        font-family: 'Playfair Display', Georgia, serif;
+        color: var(--gold);
+    }
+
+/* ===== Buttons: colors through Bootstrap's own variables ===== */
+.btn {
+    border-radius: .4rem;
+    letter-spacing: .03em;
+}
+
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--ink);
+    --bs-btn-border-color: var(--ink);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--gold-deep);
+    --bs-btn-hover-border-color: var(--gold-deep);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--gold-deep);
+    --bs-btn-active-border-color: var(--gold-deep);
+    --bs-btn-disabled-bg: var(--ink);
+    --bs-btn-disabled-border-color: var(--ink);
+    --bs-btn-focus-shadow-rgb: 184, 151, 90;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--ink);
+    --bs-btn-border-color: var(--ink);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--ink);
+    --bs-btn-hover-border-color: var(--ink);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--ink);
+    --bs-btn-active-border-color: var(--ink);
+    --bs-btn-focus-shadow-rgb: 184, 151, 90;
+}
+
+.btn-success {
+    --bs-btn-bg: var(--forest);
+    --bs-btn-border-color: var(--forest);
+    --bs-btn-hover-bg: #2f4a39;
+    --bs-btn-hover-border-color: #2f4a39;
+    --bs-btn-active-bg: #2f4a39;
+    --bs-btn-active-border-color: #2f4a39;
+}
+
+.btn-warning {
+    --bs-btn-color: var(--ink);
+    --bs-btn-bg: var(--gold);
+    --bs-btn-border-color: var(--gold);
+    --bs-btn-hover-color: var(--ink);
+    --bs-btn-hover-bg: #c9aa72;
+    --bs-btn-hover-border-color: #c9aa72;
+    --bs-btn-active-color: var(--ink);
+    --bs-btn-active-bg: #c9aa72;
+    --bs-btn-active-border-color: #c9aa72;
+}
+
+.btn-danger {
+    --bs-btn-bg: var(--wine);
+    --bs-btn-border-color: var(--wine);
+    --bs-btn-hover-bg: #5f1621;
+    --bs-btn-hover-border-color: #5f1621;
+    --bs-btn-active-bg: #5f1621;
+    --bs-btn-active-border-color: #5f1621;
+}
+
+.btn-info {
+    --bs-btn-color: var(--ink);
+    --bs-btn-bg: var(--sand);
+    --bs-btn-border-color: var(--line);
+    --bs-btn-hover-color: var(--ink);
+    --bs-btn-hover-bg: #e9dec9;
+    --bs-btn-hover-border-color: #d8c9ae;
+    --bs-btn-active-color: var(--ink);
+    --bs-btn-active-bg: #e9dec9;
+    --bs-btn-active-border-color: #d8c9ae;
+}
+
+.btn-secondary {
+    --bs-btn-bg: #6b6258;
+    --bs-btn-border-color: #6b6258;
+    --bs-btn-hover-bg: #544c44;
+    --bs-btn-hover-border-color: #544c44;
+    --bs-btn-active-bg: #544c44;
+    --bs-btn-active-border-color: #544c44;
+}
+
+/* ===== Forms ===== */
+.form-control, .form-select {
+    border-color: var(--line);
+    border-radius: .4rem;
+    background-color: #fff;
+}
+
+    .form-control:focus, .form-select:focus, .form-check-input:focus {
+        border-color: var(--gold);
+        box-shadow: 0 0 0 .2rem rgba(184, 151, 90, .25);
+    }
+
+.form-check-input:checked {
+    background-color: var(--gold-deep);
+    border-color: var(--gold-deep);
+}
+
+.control-label, .form-label {
+    font-weight: 700;
+    font-size: .85rem;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+}
+
+/* ===== Tables ===== */
+.table {
+    --bs-table-bg: #fff;
+    --bs-table-striped-bg: #f7f1e6;
+    --bs-table-hover-bg: #f0e7d6;
+    box-shadow: 0 .25rem 1rem rgba(28, 24, 20, .06);
+    border-radius: .5rem;
+    overflow: hidden;
+}
+
+    .table thead th {
+        background: var(--ink);
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        font-size: .72rem;
+        border-bottom: 0;
+        padding: .85rem .75rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: .7rem .75rem;
+    }
+
+/* ===== Cards, badges, pagination ===== */
+.card {
+    border: 1px solid var(--line);
+    border-radius: .75rem;
+    background: #fff;
+}
+
+.card-header {
+    background: var(--sand);
+    border-bottom: 1px solid var(--line);
+    font-family: 'Playfair Display', Georgia, serif;
+}
+
+.badge {
+    letter-spacing: .05em;
+    font-weight: 700;
+    padding: .45em .7em;
+}
+
+.page-link {
+    color: var(--ink);
+    border-color: var(--line);
+}
+
+    .page-link:hover {
+        color: var(--gold-deep);
+        background: var(--sand);
+    }
+
+.page-item.active .page-link {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--gold);
+}
+
+hr {
+    border-color: var(--line);
+    opacity: 1;
+}
+
+/* ===== Toasts (notifications) ===== */
+.app-toasts {
+    z-index: 1100;
+}
+
+.app-toast {
+    min-width: 20rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left-width: .35rem;
+    border-radius: .5rem;
+    box-shadow: 0 .6rem 1.4rem rgba(28, 24, 20, .18);
+}
+
+    .app-toast .toast-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.8rem;
+        font-weight: 700;
+        font-size: 1.15rem;
+    }
+
+    .app-toast .toast-body {
+        padding: .9rem .5rem .9rem 0;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+.app-toast-success {
+    border-left-color: var(--forest);
+}
+
+    .app-toast-success .toast-icon {
+        color: var(--forest);
+    }
+
+.app-toast-error {
+    border-left-color: var(--wine);
+}
+
+    .app-toast-error .toast-icon {
+        color: var(--wine);
+    }
+
+/* ===== Home hero and login (used in step D2) ===== */
+.hero {
+    position: relative;
+    border-radius: .9rem;
+    padding: 5rem 1.5rem;
+    text-align: center;
+    color: #fff;
+    /* Layers, top to bottom: dark veil, the photo, and a fallback color if there is no photo yet. */
+    background: linear-gradient(rgba(20, 16, 12, .62), rgba(20, 16, 12, .78)), url('/images/hero.jpg') center / cover no-repeat, linear-gradient(135deg, #2b251e, #14100c);
+}
+
+    .hero h1 {
+        color: #fff;
+        font-size: 3rem;
+        margin-bottom: .5rem;
+    }
+
+    .hero .eyebrow {
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: .3em;
+        font-size: .8rem;
+    }
+
+    .hero .lead {
+        color: rgba(255, 255, 255, .85);
+    }
+
+.login-shell {
+    border-radius: .9rem;
+    overflow: hidden;
+    box-shadow: 0 1rem 2.5rem rgba(28, 24, 20, .15);
+    background: #fff;
+}
+
+.login-photo {
+    min-height: 22rem;
+    background: linear-gradient(rgba(20, 16, 12, .45), rgba(20, 16, 12, .75)), url('/images/login.jpg') center / cover no-repeat, linear-gradient(135deg, #2b251e, #14100c);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2rem;
+}
+
+    .login-photo h2 {
+        color: #fff;
+    }
+/* ===== Step D2: eyebrow, module cards and error pages ===== */
+.eyebrow {
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: .3em;
+    font-size: .8rem;
+}
+
+.module-card {
+    border-top: 3px solid var(--gold);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+    .module-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .75rem 1.5rem rgba(28, 24, 20, .12) !important;
+    }
+
+.error-code {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 6rem;
+    line-height: 1;
+    color: var(--gold);
 }
