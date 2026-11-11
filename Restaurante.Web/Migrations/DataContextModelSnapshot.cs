@@ -205,6 +205,35 @@ namespace Restaurante.Web.Migrations
                     b.ToTable("OrderDetails");
                 });
 
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Permission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Permissions");
+                });
+
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -219,6 +248,21 @@ namespace Restaurante.Web.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.RolePermission", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Bill", b =>
@@ -292,6 +336,25 @@ namespace Restaurante.Web.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.RolePermission", b =>
+                {
+                    b.HasOne("Restaurante.Web.Data.Entities.Permission", "Permission")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Restaurante.Web.Data.Entities.Role", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Category", b =>
                 {
                     b.Navigation("Dishes");
@@ -314,9 +377,16 @@ namespace Restaurante.Web.Migrations
                     b.Navigation("OrderDetails");
                 });
 
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.Permission", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Role", b =>
                 {
                     b.Navigation("Employees");
+
+                    b.Navigation("RolePermissions");
                 });
 #pragma warning restore 612, 618
         }

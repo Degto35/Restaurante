@@ -15,5 +15,6 @@ namespace Restaurante.Web.Data.Entities
         public string Name { get; set; } = string.Empty;
 
         public ICollection<Employee> Employees { get; set; } = new List<Employee>();
+        public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }
 }
