@@ -21,6 +21,9 @@ namespace Restaurante.Web.Data.Entities
         public Guid EmployeeId { get; set; }
         public Employees Employee { get; set; } = null!;   // pasará a "Employee" con F2
 
+        public Guid? UserId { get; set; }
+        public user? User { get; set; }
+
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
         [NotMapped]
