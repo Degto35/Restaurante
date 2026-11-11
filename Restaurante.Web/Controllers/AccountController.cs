@@ -84,6 +84,44 @@ namespace Restaurante.Web.Controllers
             return View(response.Result!);
         }
 
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View(new ChangePasswordDTO());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+            Response response = await _accountService.ChangePasswordAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al cambiar la contraseña.");
+
+                if (response.Errors is not null)
+                {
+                    foreach (string error in response.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error);
+                    }
+                }
+
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Profile));
+        }
+
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]

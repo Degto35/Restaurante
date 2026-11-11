@@ -12,13 +12,15 @@ namespace Restaurante.Web.Services.Implementations
     public class AccountService : IAccountService
     {
         private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
         private readonly DataContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly Dictionary<string, bool> _permissionCache = new();
-        public AccountService(SignInManager<User> signInManager, DataContext context,
-                              IHttpContextAccessor httpContextAccessor)
+        public AccountService(SignInManager<User> signInManager, UserManager<User> userManager,
+                         DataContext context, IHttpContextAccessor httpContextAccessor)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -107,6 +109,47 @@ namespace Restaurante.Web.Services.Implementations
                 await _context.SaveChangesAsync();
 
                 return Response.Success("Perfil actualizado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return Response.Failure(ex);
+            }
+        }
+
+        public async Task<Response> ChangePasswordAsync(ChangePasswordDTO dto)
+        {
+            try
+            {
+                User? user = await GetCurrentUserAsync();
+
+                if (user is null)
+                {
+                    return Response.Failure("No se encontró el usuario de la sesión.");
+                }
+
+                if (dto.CurrentPassword == dto.NewPassword)
+                {
+                    return Response.Failure("La nueva contraseña debe ser distinta a la actual.");
+                }
+
+                
+                IdentityResult result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+
+                if (!result.Succeeded)
+                {
+                    if (result.Errors.Any(e => e.Code == "PasswordMismatch"))
+                    {
+                        return Response.Failure("La contraseña actual no es correcta.");
+                    }
+
+                    List<string> errors = result.Errors.Select(e => e.Description).ToList();
+                    return Response.Failure("No se pudo cambiar la contraseña.", errors);
+                }
+
+                
+                await _signInManager.RefreshSignInAsync(user);
+
+                return Response.Success("Contraseña actualizada correctamente.");
             }
             catch (Exception ex)
             {

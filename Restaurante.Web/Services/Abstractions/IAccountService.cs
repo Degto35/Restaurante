@@ -10,6 +10,7 @@ namespace Restaurante.Web.Services.Abstractions
         Task LogoutAsync();
         Task<Response<ProfileDTO>> GetProfileAsync();
         Task<Response> UpdateProfileAsync(ProfileDTO dto);
+        Task<Response> ChangePasswordAsync(ChangePasswordDTO dto);
         bool AccountUserIsAuthenticated();
         Task<bool> AccountUserIsAuthorizedAsync(string permissionCode);
         Task<bool> AccountUserIsSuperAdminAsync();
