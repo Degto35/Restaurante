@@ -10,8 +10,14 @@
         .Where(s => s != OrderStatus.Paid)
         .Select(s => new SelectListItem(s.ToDisplayName(), s.ToString(), s == Model.Status));
 
-    var paymentItems = Enum.GetValues<PaymentMethod>()                                     
+    var paymentItems = Enum.GetValues<PaymentMethod>()
         .Select(m => new SelectListItem(m.ToDisplayName(), m.ToString()));
+
+    bool canUpdate = await AccountService.AccountUserIsAuthorizedAsync("orders.update");
+    bool canPay = await AccountService.AccountUserIsAuthorizedAsync("orders.pay");
+
+    // The "Quitar" column exists only if the order is open AND the user may change it.
+    bool canEdit = !Model.IsClosed && canUpdate;
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -30,7 +36,7 @@
             </div>
         </div>
 
-        @if (Model.PaymentMethod != null)                                                    
+        @if (Model.PaymentMethod != null)
         {
             <div class="row mt-2">
                 <div class="col-12">
@@ -57,7 +63,7 @@ else
                 <th class="text-end">Cantidad</th>
                 <th class="text-end">Precio</th>
                 <th class="text-end">Subtotal</th>
-                @if (!Model.IsClosed)
+                @if (canEdit)
                 {
                     <th></th>
                 }
@@ -71,7 +77,7 @@ else
                     <td class="text-end">@line.Quantity</td>
                     <td class="text-end">@line.UnitPrice.ToString("C")</td>
                     <td class="text-end">@line.Subtotal.ToString("C")</td>
-                    @if (!Model.IsClosed)
+                    @if (canEdit)
                     {
                         <td class="text-end">
                             <form asp-action="RemoveDetail" method="post" class="d-inline">
@@ -88,7 +94,7 @@ else
             <tr>
                 <th colspan="3" class="text-end">Total</th>
                 <th class="text-end">@Model.Total.ToString("C")</th>
-                @if (!Model.IsClosed)
+                @if (canEdit)
                 {
                     <th></th>
                 }
@@ -97,7 +103,7 @@ else
     </table>
 }
 
-@if (!Model.IsClosed)
+@if (canEdit)
 {
     <div class="row mt-4">
         <div class="col-md-7">
@@ -131,24 +137,24 @@ else
             </form>
         </div>
     </div>
+}
 
-    @if (Model.OrderDetails.Any())                                                          
-    {
-        <div class="row mt-3">
-            <div class="col-md-7">
-                <h5>Pagar pedido</h5>
-                <form asp-action="Pay" method="post" class="row g-2">
-                    <input type="hidden" name="OrderId" value="@Model.Id" />
-                    <div class="col-sm-5">
-                        <select name="PaymentMethod" class="form-select" asp-items="paymentItems"></select>
-                    </div>
-                    <div class="col-sm-5">
-                        <button type="submit" class="btn btn-success w-100">Pagar @Model.Total.ToString("C")</button>
-                    </div>
-                </form>
-            </div>
+@if (!Model.IsClosed && canPay && Model.OrderDetails.Any())
+{
+    <div class="row mt-3">
+        <div class="col-md-7">
+            <h5>Pagar pedido</h5>
+            <form asp-action="Pay" method="post" class="row g-2">
+                <input type="hidden" name="OrderId" value="@Model.Id" />
+                <div class="col-sm-5">
+                    <select name="PaymentMethod" class="form-select" asp-items="paymentItems"></select>
+                </div>
+                <div class="col-sm-5">
+                    <button type="submit" class="btn btn-success w-100">Pagar @Model.Total.ToString("C")</button>
+                </div>
+            </form>
         </div>
-    }
+    </div>
 }
 
 <div class="mt-4">

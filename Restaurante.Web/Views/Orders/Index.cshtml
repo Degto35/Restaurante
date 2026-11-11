@@ -9,9 +9,12 @@
 
 <partial name="_Alerts" />
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Nuevo Pedido</a>
-</p>
+@if (await AccountService.AccountUserIsAuthorizedAsync("orders.create"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Nuevo Pedido</a>
+    </p>
+}
 
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-auto">

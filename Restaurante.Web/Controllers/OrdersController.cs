@@ -7,6 +7,7 @@ using Restaurante.Web.Services.Abstractions;
 using Restaurante.Web.Services.Implementations;
 using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Core.Pagination;
+using Restaurante.Web.Core.Attributes;
 
 namespace Restaurante.Web.Controllers
 {
@@ -22,6 +23,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("orders.show")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             Response<PaginationResponse<OrderDTO>> response = await _ordersService.GetPaginationAsync(request);
@@ -35,6 +37,7 @@ namespace Restaurante.Web.Controllers
             return View(response.Result!);
         }
 
+        [CustomAuthorize("orders.show")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<OrderDTO> response = await _ordersService.GetOneAsync(id);
@@ -51,6 +54,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("orders.create")]
         public async Task<IActionResult> Create()
         {
             CreateOrderDTO dto = new CreateOrderDTO();
@@ -59,6 +63,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateOrderDTO dto)
         {
@@ -82,6 +87,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddDetail(CreateOrderDetailDTO dto)
         {
@@ -98,6 +104,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemoveDetail(Guid detailId, Guid orderId)
         {
@@ -108,6 +115,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateStatus(UpdateOrderDTO dto)
         {
@@ -118,6 +126,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("orders.pay")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Pay(PayOrderDTO dto)
         {

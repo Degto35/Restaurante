@@ -23,33 +23,42 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Categories" asp-action="Index">Categorías</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Dishes" asp-action="Index">Platos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="DiningTables" asp-action="Index">Mesas</a>
-                        </li>
-
-                        @if (await AccountService.AccountUserIsAuthorizedAsync("roles.show"))
+                        @if (await AccountService.AccountUserIsAuthorizedAsync("categories.show"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Roles" asp-action="Index">Roles</a>
+                                <a class="nav-link" asp-controller="Categories" asp-action="Index">Categorías</a>
                             </li>
                         }
-
+                        @if (await AccountService.AccountUserIsAuthorizedAsync("dishes.show"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dishes" asp-action="Index">Platos</a>
+                            </li>
+                        }
+                        @if (await AccountService.AccountUserIsAuthorizedAsync("tables.show"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="DiningTables" asp-action="Index">Mesas</a>
+                            </li>
+                        }
+                        @if (await AccountService.AccountUserIsAuthorizedAsync("orders.show"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Orders" asp-action="Index">Pedidos</a>
+                            </li>
+                        }
                         @if (await AccountService.AccountUserIsAuthorizedAsync("users.show"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Users" asp-action="Index">Usuarios</a>
                             </li>
                         }
-                       
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Orders" asp-action="Index">Pedidos</a>
-                        </li>
+                        @if (await AccountService.AccountUserIsAuthorizedAsync("roles.show"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Roles" asp-action="Index">Roles</a>
+                            </li>
+                        }
                     </ul>
 
                     <ul class="navbar-nav">
