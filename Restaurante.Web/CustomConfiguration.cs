@@ -7,6 +7,7 @@ using Restaurante.Web.Helpers.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.Data.Seeders;
+using Restaurante.Web.Core;
 
 namespace Restaurante.Web
 {
@@ -42,6 +43,8 @@ namespace Restaurante.Web
             builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();
             builder.Services.AddTransient<SeedDb>();
             builder.Services.AddScoped<IUsersService, UsersService>();
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+            builder.Services.AddScoped<IEmailService, EmailService>();
         }
         
         private static void AddIAM(WebApplicationBuilder builder)
@@ -59,6 +62,11 @@ namespace Restaurante.Web
                 config.Password.RequiredLength = 4;
             }).AddEntityFrameworkStores<DataContext>()
               .AddDefaultTokenProviders();
+        
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(1);
+            });
 
             builder.Services.ConfigureApplicationCookie(config =>
             {

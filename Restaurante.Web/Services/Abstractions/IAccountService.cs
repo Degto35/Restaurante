@@ -11,6 +11,8 @@ namespace Restaurante.Web.Services.Abstractions
         Task<Response<ProfileDTO>> GetProfileAsync();
         Task<Response> UpdateProfileAsync(ProfileDTO dto);
         Task<Response> ChangePasswordAsync(ChangePasswordDTO dto);
+        Task<Response> SendPasswordResetEmailAsync(ForgotPasswordDTO dto, Func<string, string> buildResetLink);
+        Task<Response> ResetPasswordAsync(ResetPasswordDTO dto);
         bool AccountUserIsAuthenticated();
         Task<bool> AccountUserIsAuthorizedAsync(string permissionCode);
         Task<bool> AccountUserIsSuperAdminAsync();

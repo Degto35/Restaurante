@@ -165,6 +165,82 @@ namespace Restaurante.Web.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View(new ForgotPasswordDTO());
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+         
+            Response response = await _accountService.SendPasswordResetEmailAsync(dto, token =>
+                Url.Action(nameof(ResetPassword), "Account", new { email = dto.Email, token }, Request.Scheme)!);
+
+            if (!response.IsSuccess)
+            {
+                TempData["Error"] = response.Message;
+                return View(dto);
+            }
+
+           
+            TempData["Exito"] = "Si el correo está registrado, te enviamos un enlace para restablecer tu contraseña.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string? email, string? token)
+        {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(token))
+            {
+                TempData["Error"] = "El enlace no es válido o ya venció. Solicita uno nuevo.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            return View(new ResetPasswordDTO { Email = email, Token = token });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+            Response response = await _accountService.ResetPasswordAsync(dto);
+
+            if (!response.IsSuccess)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Error al restablecer la contraseña.");
+
+                if (response.Errors is not null)
+                {
+                    foreach (string error in response.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error);
+                    }
+                }
+
+                return View(dto);
+            }
+
+            TempData["Exito"] = response.Message;
+            return RedirectToAction(nameof(Login));
+        }
+
 
     }
 }
