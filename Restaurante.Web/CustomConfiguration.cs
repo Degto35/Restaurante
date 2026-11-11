@@ -6,6 +6,7 @@ using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Helpers.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Restaurante.Web.Data.Entities;
+using Restaurante.Web.Data.Seeders;
 
 namespace Restaurante.Web
 {
@@ -37,6 +38,7 @@ namespace Restaurante.Web
             builder.Services.AddScoped<IDiningTablesService, DiningTablesService>();
             builder.Services.AddScoped<IOrdersService, OrdersService>();
             builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();
+            builder.Services.AddTransient<SeedDb>();
         }
         
         private static void AddIAM(WebApplicationBuilder builder)
@@ -63,6 +65,21 @@ namespace Restaurante.Web
                 config.LoginPath = "/Account/Login";             
                 config.AccessDeniedPath = "/Account/AccessDenied";
             });
+        }
+        public static WebApplication AddCustomWebApplicationConfiguration(this WebApplication app)
+        {
+            SeedData(app);
+
+            return app;
+        }
+
+        private static void SeedData(WebApplication app)
+        {
+            
+            using IServiceScope scope = app.Services.CreateScope();
+            SeedDb seeder = scope.ServiceProvider.GetRequiredService<SeedDb>();
+
+            seeder.SeedAsync().GetAwaiter().GetResult();
         }
     }
 }
