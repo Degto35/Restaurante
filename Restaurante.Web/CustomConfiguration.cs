@@ -41,6 +41,7 @@ namespace Restaurante.Web
             builder.Services.AddScoped<IOrdersService, OrdersService>();
             builder.Services.AddScoped<ISelectListHelper, SelectListHelper>();
             builder.Services.AddTransient<SeedDb>();
+            builder.Services.AddScoped<IUsersService, UsersService>();
         }
         
         private static void AddIAM(WebApplicationBuilder builder)

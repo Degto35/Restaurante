@@ -6,6 +6,7 @@ using Restaurante.Web.DTOs.Dishes;
 using Restaurante.Web.DTOs.Roles;
 using Restaurante.Web.Data.Enums;
 using Restaurante.Web.DTOs.Orders;
+using Restaurante.Web.DTOs.Users;
 
 namespace Restaurante.Web.Core
 {
@@ -37,6 +38,9 @@ namespace Restaurante.Web.Core
                 .ForMember(d => d.UserFullName, o => o.MapFrom(s => s.User.FirstName + " " + s.User.LastName))
                 .ForMember(d => d.PaymentMethod, o => o.MapFrom(s => s.Bill != null ? (PaymentMethod?)s.Bill.PaymentMethod : null))
                 .ForMember(d => d.PaidAt, o => o.MapFrom(s => s.Bill != null ? (DateTime?)s.Bill.PaidAt : null));
+
+            CreateMap<User, UserDTO>()
+                .ForMember(d => d.RoleName, o => o.MapFrom(s => s.Role!.Name));
         }
     }
 }

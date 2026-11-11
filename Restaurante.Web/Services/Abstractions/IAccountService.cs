@@ -12,5 +12,7 @@ namespace Restaurante.Web.Services.Abstractions
         Task<Response> UpdateProfileAsync(ProfileDTO dto);
         bool AccountUserIsAuthenticated();
         Task<bool> AccountUserIsAuthorizedAsync(string permissionCode);
+        Task<bool> AccountUserIsSuperAdminAsync();
+        string? GetCurrentUserId();
     }
 }
