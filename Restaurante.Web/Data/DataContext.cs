@@ -18,6 +18,7 @@ namespace Restaurante.Web.Data
         public DbSet<DiningTable> DiningTables { get; set; }    
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<user> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -59,6 +60,11 @@ namespace Restaurante.Web.Data
                 .HasOne(d => d.Dish)
                 .WithMany()
                 .HasForeignKey(d => d.DishId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

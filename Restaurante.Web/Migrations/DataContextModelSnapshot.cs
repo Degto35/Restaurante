@@ -60,11 +60,16 @@ namespace Restaurante.Web.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DiningTableId");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -94,6 +99,31 @@ namespace Restaurante.Web.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("OrderDetails");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.user", b =>
+                {
+                    b.Property<Guid>("IdUser")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("IdUser");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Entities.Categories", b =>
@@ -209,9 +239,16 @@ namespace Restaurante.Web.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Restaurante.Web.Data.Entities.user", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("DiningTable");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Data.Entities.OrderDetail", b =>
@@ -263,6 +300,11 @@ namespace Restaurante.Web.Migrations
             modelBuilder.Entity("Restaurante.Web.Data.Entities.Order", b =>
                 {
                     b.Navigation("OrderDetails");
+                });
+
+            modelBuilder.Entity("Restaurante.Web.Data.Entities.user", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("Restaurante.Web.Entities.Categories", b =>
