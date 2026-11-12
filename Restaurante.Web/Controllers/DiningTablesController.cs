@@ -17,7 +17,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize("dishes.show")]
+        [CustomAuthorize("tables.show")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             Response<PaginationResponse<DiningTableDTO>> response = await _diningTablesService.GetPaginationAsync(request);
@@ -32,7 +32,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize("dishes.show")]
+        [CustomAuthorize("tables.show")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<DiningTableDTO> response = await _diningTablesService.GetOneAsync(id);
@@ -47,14 +47,14 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize("dishes.create")]
+        [CustomAuthorize("table.create")]
         public IActionResult Create()
         {
             return View(new CreateDiningTableDTO());
         }
 
         [HttpPost]
-        [CustomAuthorize("dishes.create")]
+        [CustomAuthorize("table.create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateDiningTableDTO dto)
         {
@@ -76,7 +76,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize("dishes.update")]
+        [CustomAuthorize("table.update")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<DiningTableDTO> response = await _diningTablesService.GetOneAsync(id);
@@ -98,7 +98,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("dishes.update")]
+        [CustomAuthorize("table.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateDiningTableDTO dto)
         {
@@ -120,7 +120,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("dishes.delete")]
+        [CustomAuthorize("table.delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
@@ -131,7 +131,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("dishes.update")]
+        [CustomAuthorize("Table.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleAvailability(Guid id)
         {
