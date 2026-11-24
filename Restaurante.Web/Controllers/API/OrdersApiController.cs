@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Restaurante.Web.Core;
 using Restaurante.Web.Core.Attributes;
 using Restaurante.Web.Core.Pagination;
@@ -7,13 +9,14 @@ using Restaurante.Web.Services.Abstractions;
 
 namespace Restaurante.Web.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/orders")]
     [ApiController]
-    public class OrdersController : ApiController
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public class OrdersApiController : ApiController
     {
         private readonly IOrdersService _ordersService;
 
-        public OrdersController(IOrdersService ordersService)
+        public OrdersApiController(IOrdersService ordersService)
         {
             _ordersService = ordersService;
         }
