@@ -9,6 +9,8 @@ using Restaurante.Web.Services.Abstractions;
 using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Restaurante.Web.Services.Implementations
 {
@@ -20,15 +22,17 @@ namespace Restaurante.Web.Services.Implementations
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmailService _emailService;
         private readonly Dictionary<string, bool> _permissionCache = new();
+        private readonly IConfiguration _configuration;
         public AccountService(SignInManager<User> signInManager, UserManager<User> userManager,
                         DataContext context, IHttpContextAccessor httpContextAccessor,
-                        IEmailService emailService)
+                        IEmailService emailService, IConfiguration configuration)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         public async Task<Response> LoginAsync(LoginDTO dto)
@@ -51,6 +55,58 @@ namespace Restaurante.Web.Services.Implementations
             {
                 return Response.Failure(ex);
             }
+        }
+
+        private const int ApiTokenHours = 2;
+
+        public async Task<Response<UserTokenDTO>> LoginApiAsync(LoginDTO dto)
+        {
+            User? user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user is null)
+            {
+                return Response<UserTokenDTO>.Failure("Usuario o contraseña incorrectos");
+            }
+
+            // CheckPasswordSignInAsync validates the password without creating a cookie
+            SignInResult result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+            {
+                return Response<UserTokenDTO>.Failure("Usuario o contraseña incorrectos");
+            }
+
+            return Response<UserTokenDTO>.Success(BuildToken(user));
+        }
+
+        private UserTokenDTO BuildToken(User user)
+        {
+            string email = user.Email ?? string.Empty;
+
+            List<Claim> claims =
+            [
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, email),
+                new Claim(ClaimTypes.Email, email)
+            ];
+
+            DateTime expiresAt = DateTime.UtcNow.AddHours(ApiTokenHours);
+            string signKey = _configuration["JWT:SignKey"]!;
+
+            SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Issuer = _configuration["JWT:Issuer"],
+                Audience = _configuration["JWT:Audience"],
+                Expires = expiresAt,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signKey)),
+                    SecurityAlgorithms.HmacSha256)
+            };
+
+            string token = new JsonWebTokenHandler().CreateToken(descriptor);
+
+            return new UserTokenDTO { Token = token, ExpiresAt = expiresAt };
         }
 
         public async Task LogoutAsync()
@@ -152,8 +208,13 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("No se pudo cambiar la contraseña.", errors);
                 }
 
-                
-                await _signInManager.RefreshSignInAsync(user);
+
+                bool isApiCall = _httpContextAccessor.HttpContext?.Request.Path.StartsWithSegments("/api") == true;
+
+                if (!isApiCall)
+                {
+                    await _signInManager.RefreshSignInAsync(user);
+                }
 
                 return Response.Success("Contraseña actualizada correctamente.");
             }

@@ -7,6 +7,7 @@ namespace Restaurante.Web.Services.Abstractions
     public interface IAccountService
     {
         Task<Response> LoginAsync(LoginDTO dto);
+        Task<Response<UserTokenDTO>> LoginApiAsync(LoginDTO dto);
         Task LogoutAsync();
         Task<Response<ProfileDTO>> GetProfileAsync();
         Task<Response> UpdateProfileAsync(ProfileDTO dto);
@@ -17,5 +18,6 @@ namespace Restaurante.Web.Services.Abstractions
         Task<bool> AccountUserIsAuthorizedAsync(string permissionCode);
         Task<bool> AccountUserIsSuperAdminAsync();
         string? GetCurrentUserId();
+        
     }
 }
