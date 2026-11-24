@@ -17,7 +17,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize("table.show")]
+        [CustomAuthorize("tables.show")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             Response<PaginationResponse<DiningTableDTO>> response = await _diningTablesService.GetPaginationAsync(request);
@@ -32,7 +32,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
-        [CustomAuthorize("table.show")]
+        [CustomAuthorize("tables.show")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<DiningTableDTO> response = await _diningTablesService.GetOneAsync(id);
@@ -131,7 +131,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("table.update")]
+        [CustomAuthorize("Table.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleAvailability(Guid id)
         {
