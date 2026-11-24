@@ -1,13 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Restaurante.Web.Data;
-using Restaurante.Web.Services.Abstractions;
-using Restaurante.Web.Services.Implementations;
-using Restaurante.Web.Helpers.Abstractions;
-using Restaurante.Web.Helpers.Implementations;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Restaurante.Web.Core;
+using Restaurante.Web.Data;
 using Restaurante.Web.Data.Entities;
 using Restaurante.Web.Data.Seeders;
-using Restaurante.Web.Core;
+using Restaurante.Web.Helpers.Abstractions;
+using Restaurante.Web.Helpers.Implementations;
+using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Services.Implementations;
+
 
 namespace Restaurante.Web
 {
@@ -75,6 +78,44 @@ namespace Restaurante.Web
                 config.SlidingExpiration = true;                 
                 config.LoginPath = "/Account/Login";             
                 config.AccessDeniedPath = "/Account/AccessDenied";
+            });
+
+            string jwtIssuer = builder.Configuration["JWT:Issuer"]
+                ?? throw new InvalidOperationException("Falta JWT:Issuer en user-secrets");
+            string jwtAudience = builder.Configuration["JWT:Audience"]
+                ?? throw new InvalidOperationException("Falta JWT:Audience en user-secrets");
+            string jwtSignKey = builder.Configuration["JWT:SignKey"]
+                ?? throw new InvalidOperationException("Falta JWT:SignKey en user-secrets");
+
+            const string CookieOrJwt = "CookieOrJwt";
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieOrJwt;
+                options.DefaultChallengeScheme = CookieOrJwt;
+            })
+            .AddPolicyScheme(CookieOrJwt, "Cookie for pages, JWT for /api", options =>
+            {
+                options.ForwardDefaultSelector = context =>
+                    context.Request.Path.StartsWithSegments("/api")
+                        ? JwtBearerDefaults.AuthenticationScheme
+                        : IdentityConstants.ApplicationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSignKey)),
+
+                    ClockSkew = TimeSpan.Zero
+                };
             });
         }
         public static WebApplication AddCustomWebApplicationConfiguration(this WebApplication app)
