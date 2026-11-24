@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Restaurante.Web.Core;
@@ -49,7 +50,6 @@ namespace Restaurante.Web.Services.Implementations
             return await GetPagedListAsync<UserDTO, User>(request, query);
         }
 
-  
         public async Task<Response<UserDTO>> GetOneAsync(string id)
         {
             try
@@ -75,14 +75,16 @@ namespace Restaurante.Web.Services.Implementations
         {
             try
             {
-                Role? role = await _context.RestauranteRoles.FirstOrDefaultAsync(r => r.Id == dto.RoleId);
+                Role? role = await _context.RestauranteRoles
+                    .FirstOrDefaultAsync(r => r.Id == dto.RoleId);
 
                 if (role is null)
                 {
                     return Response.Failure("El rol seleccionado no existe.");
                 }
 
-                if (role.Name == Env.SUPER_ADMIN_ROLE_NAME && !await _accountService.AccountUserIsSuperAdminAsync())
+                if (role.Name == Env.SUPER_ADMIN_ROLE_NAME &&
+                    !await _accountService.AccountUserIsSuperAdminAsync())
                 {
                     return Response.Failure("Solo un administrador puede asignar el rol de administrador.");
                 }
@@ -100,21 +102,22 @@ namespace Restaurante.Web.Services.Implementations
                 User user = new User
                 {
                     Email = dto.Email,
-                    UserName = dto.Email,   
+                    UserName = dto.Email,
                     FirstName = dto.FirstName,
                     LastName = dto.LastName,
                     Document = dto.Document,
                     PhoneNumber = dto.PhoneNumber,
                     RoleId = dto.RoleId,
-                    EmailConfirmed = true  
+                    EmailConfirmed = true
                 };
 
-              
                 IdentityResult result = await _userManager.CreateAsync(user, dto.Password);
 
                 if (!result.Succeeded)
                 {
-                    List<string> errors = result.Errors.Select(e => e.Description).ToList();
+                    List<string> errors = result.Errors
+                        .Select(e => e.Description).ToList();
+
                     return Response.Failure("No se pudo crear el usuario.", errors);
                 }
 
@@ -139,55 +142,44 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("No existe el usuario solicitado.");
                 }
 
-                Role? newRole = await _context.RestauranteRoles.FirstOrDefaultAsync(r => r.Id == dto.RoleId);
+                Role? newRole = await _context.RestauranteRoles
+                    .FirstOrDefaultAsync(r => r.Id == dto.RoleId);
 
                 if (newRole is null)
                 {
                     return Response.Failure("El rol seleccionado no existe.");
                 }
 
-                // Rule 1: only the super admin touches admin accounts or hands out the admin role.
                 bool targetIsAdmin = user.Role!.Name == Env.SUPER_ADMIN_ROLE_NAME;
                 bool newRoleIsAdmin = newRole.Name == Env.SUPER_ADMIN_ROLE_NAME;
 
-                if ((targetIsAdmin || newRoleIsAdmin) && !await _accountService.AccountUserIsSuperAdminAsync())
+                if ((targetIsAdmin || newRoleIsAdmin) &&
+                    !await _accountService.AccountUserIsSuperAdminAsync())
                 {
                     return Response.Failure("Solo un administrador puede modificar usuarios con rol de administrador o asignar ese rol.");
                 }
 
-                // Rule 2: nobody changes their own role.
-                if (user.Id == _accountService.GetCurrentUserId() && user.RoleId != dto.RoleId)
+                if (user.Id == _accountService.GetCurrentUserId() &&
+                    user.RoleId != dto.RoleId)
                 {
                     return Response.Failure("No puedes cambiar tu propio rol.");
                 }
 
-                if (await _context.Users.AnyAsync(u => u.Document == dto.Document && u.Id != user.Id))
+                if (await _context.Users.AnyAsync(u =>
+                    u.Document == dto.Document && u.Id != user.Id))
                 {
                     return Response.Failure("Ya existe otro usuario con ese documento.");
                 }
 
+                // Actualizar únicamente los datos del usuario.
+                // La contraseña permanece sin modificaciones.
                 user.FirstName = dto.FirstName;
                 user.LastName = dto.LastName;
                 user.Document = dto.Document;
                 user.PhoneNumber = dto.PhoneNumber;
                 user.RoleId = dto.RoleId;
 
-                if (string.IsNullOrWhiteSpace(dto.NewPassword))
-                {
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    // All or nothing: if the new password is rejected, no other change is saved either.
-                    string token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    IdentityResult result = await _userManager.ResetPasswordAsync(user, token, dto.NewPassword);
-
-                    if (!result.Succeeded)
-                    {
-                        List<string> errors = result.Errors.Select(e => e.Description).ToList();
-                        return Response.Failure("No se pudo cambiar la contraseña.", errors);
-                    }
-                }
+                await _context.SaveChangesAsync();
 
                 return Response.Success("Usuario actualizado correctamente.");
             }
@@ -215,7 +207,8 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("No puedes eliminar tu propio usuario.");
                 }
 
-                if (user.Role!.Name == Env.SUPER_ADMIN_ROLE_NAME && !await _accountService.AccountUserIsSuperAdminAsync())
+                if (user.Role!.Name == Env.SUPER_ADMIN_ROLE_NAME &&
+                    !await _accountService.AccountUserIsSuperAdminAsync())
                 {
                     return Response.Failure("Solo un administrador puede eliminar a otro administrador.");
                 }
@@ -229,7 +222,9 @@ namespace Restaurante.Web.Services.Implementations
 
                 if (!result.Succeeded)
                 {
-                    List<string> errors = result.Errors.Select(e => e.Description).ToList();
+                    List<string> errors = result.Errors
+                        .Select(e => e.Description).ToList();
+
                     return Response.Failure("No se pudo eliminar el usuario.", errors);
                 }
 
