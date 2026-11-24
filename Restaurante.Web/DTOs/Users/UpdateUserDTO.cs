@@ -36,17 +36,6 @@ namespace Restaurante.Web.DTOs.Users
         [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         public Guid RoleId { get; set; }
 
-       
-        [Display(Name = "Nueva contraseña")]
-        [StringLength(100, MinimumLength = 4, ErrorMessage = "El campo {0} debe tener entre {2} y {1} caracteres.")]
-        [DataType(DataType.Password)]
-        public string? NewPassword { get; set; }
-
-        [Display(Name = "Confirmar nueva contraseña")]
-        [DataType(DataType.Password)]
-        [Compare(nameof(NewPassword), ErrorMessage = "Las contraseñas no coinciden.")]
-        public string? ConfirmNewPassword { get; set; }
-
         public IEnumerable<SelectListItem>? Roles { get; set; }
     }
 }
