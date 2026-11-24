@@ -1,11 +1,14 @@
 # Integration test for the REST API (development only: it uses the seeded users).
 # The application must be running. From the folder that contains this file:
-#   .\test-api.ps1
-#   .\test-api.ps1 -BaseUrl https://localhost:7232 -ControllersPath .\Restaurante.Web\Controllers
+#   .\test-api.ps1 -ControllersPath .\Controllers
 #
 # How permissions are checked without creating data:
 # authorization runs BEFORE the body is validated, so a user WITHOUT permission gets 403,
-# while a user WITH permission gets another code (200 for a list, 400 for an empty body).
+# while a user WITH permission gets another code (200 for a list, 400 for an empty body
+# or an id that does not exist).
+#
+# Assumed roles (default seeder): Mesero = orders.show/create/update (no orders.pay),
+# Cajero = orders.show and orders.pay only.
 
 param(
     [string]$BaseUrl = "https://localhost:7232",
@@ -13,8 +16,8 @@ param(
 )
 
 $adminEmail   = "admin@restaurante.com"
-$waiterEmail  = "laura@restaurante.com"   # role Mesero: has the *.show permissions
-$cashierEmail = "pedro@restaurante.com"   # role Cajero: only orders.show and orders.pay
+$waiterEmail  = "laura@restaurante.com"
+$cashierEmail = "pedro@restaurante.com"
 $password     = "1234"                    # development password of the seeded users
 
 $script:passed = 0
@@ -77,6 +80,19 @@ function Test-Case([string]$Name, [int]$Actual, [string]$Rule) {
     Report $Name $ok $detail
 }
 
+# One request for each of the four identities.
+# $Rules = expected result for: none, admin, waiter, cashier (use "-" to skip one).
+function Test-Endpoint([string]$Label, [string]$Method, [string]$Path, [string]$Body, [string[]]$Rules) {
+    $tokens = @($null, $script:adminToken, $script:waiterToken, $script:cashierToken)
+    $who    = @("sin token", "admin", "mesero", "cajero")
+
+    for ($i = 0; $i -lt 4; $i++) {
+        if ($Rules[$i] -eq "-") { continue }
+        $code = Invoke-Api $Method $Path $tokens[$i] $Body
+        Test-Case ("{0,-34} {1}" -f $Label, $who[$i]) $code $Rules[$i]
+    }
+}
+
 # ---------------------------------------------------------------------------
 Write-Host "`n== Codigos de permiso usados en los controladores ==" -ForegroundColor Cyan
 
@@ -124,56 +140,56 @@ if ($health -ne 200) {
     exit 1
 }
 
-$adminToken   = Get-Token $adminEmail $password
-$waiterToken  = Get-Token $waiterEmail $password
-$cashierToken = Get-Token $cashierEmail $password
+$script:adminToken   = Get-Token $adminEmail $password
+$script:waiterToken  = Get-Token $waiterEmail $password
+$script:cashierToken = Get-Token $cashierEmail $password
 
-if (-not $adminToken -or -not $waiterToken -or -not $cashierToken) {
+if (-not $script:adminToken -or -not $script:waiterToken -or -not $script:cashierToken) {
     Write-Host "No se pudo obtener el token (admin, mesero o cajero). Revisa los usuarios y la contrasena." -ForegroundColor Red
     exit 1
 }
 
 Write-Host "  Tokens obtenidos para admin, mesero y cajero."
 
-$fakeId = "00000000-0000-0000-0000-000000000001"
-$resources = @("categories", "dishes", "diningtables", "orders")
+$id = "00000000-0000-0000-0000-000000000001"
 
+# ---------------------------------------------------------------------------
 Write-Host "`n== Cuenta y autenticacion ==" -ForegroundColor Cyan
-Test-Case "GET api/health (sin token)"             (Invoke-Api "GET" "/api/health" $null $null) "allowed"
-Test-Case "GET api/account/profile (sin token)"    (Invoke-Api "GET" "/api/account/profile" $null $null) "401"
-Test-Case "GET api/account/profile (admin)"        (Invoke-Api "GET" "/api/account/profile" $adminToken $null) "allowed"
-Test-Case "GET api/account/profile (cajero)"       (Invoke-Api "GET" "/api/account/profile" $cashierToken $null) "allowed"
-Test-Case "GET api/account/profile (token alterado)" (Invoke-Api "GET" "/api/account/profile" ($adminToken + "x") $null) "401"
+Test-Case "GET api/health (sin token)"               (Invoke-Api "GET" "/api/health" $null $null) "allowed"
+Test-Case "GET api/account/profile (sin token)"      (Invoke-Api "GET" "/api/account/profile" $null $null) "401"
+Test-Case "GET api/account/profile (admin)"          (Invoke-Api "GET" "/api/account/profile" $script:adminToken $null) "allowed"
+Test-Case "GET api/account/profile (cajero)"         (Invoke-Api "GET" "/api/account/profile" $script:cashierToken $null) "allowed"
+Test-Case "GET api/account/profile (token alterado)" (Invoke-Api "GET" "/api/account/profile" ($script:adminToken + "x") $null) "401"
 
-foreach ($r in $resources) {
+# ---------------------------------------------------------------------------
+# Categories, dishes and tables: the waiter has only the .show permission here,
+# the cashier has none.
+foreach ($r in @("categories", "dishes", "diningtables")) {
     Write-Host "`n== api/$r ==" -ForegroundColor Cyan
 
-    # No token: always 401
-    Test-Case "GET    sin token"            (Invoke-Api "GET"    "/api/$r" $null $null) "401"
-    Test-Case "POST   sin token"            (Invoke-Api "POST"   "/api/$r" $null "{}") "401"
-    Test-Case "DELETE sin token"            (Invoke-Api "DELETE" "/api/$r/$fakeId" $null $null) "401"
-
-    # Admin: passes everything
-    Test-Case "GET    admin"                (Invoke-Api "GET"    "/api/$r" $adminToken $null) "allowed"
-    Test-Case "POST   admin (cuerpo vacio)" (Invoke-Api "POST"   "/api/$r" $adminToken "{}") "allowed"
-    Test-Case "PUT    admin (cuerpo vacio)" (Invoke-Api "PUT"    "/api/$r" $adminToken "{}") "allowed"
-    Test-Case "DELETE admin (id falso)"     (Invoke-Api "DELETE" "/api/$r/$fakeId" $adminToken $null) "allowed"
-
-    # Waiter: has the .show permission of all four modules
-    Test-Case "GET    mesero (tiene .show)" (Invoke-Api "GET" "/api/$r" $waiterToken $null) "allowed"
-
-    # Cashier: only orders.show and orders.pay
-    if ($r -eq "orders") {
-        Test-Case "GET    cajero (orders.show)" (Invoke-Api "GET" "/api/$r" $cashierToken $null) "allowed"
-    }
-    else {
-        Test-Case "GET    cajero (sin permiso)" (Invoke-Api "GET" "/api/$r" $cashierToken $null) "403"
-    }
-
-    Test-Case "POST   cajero (sin permiso)" (Invoke-Api "POST"   "/api/$r" $cashierToken "{}") "403"
-    Test-Case "PUT    cajero (sin permiso)" (Invoke-Api "PUT"    "/api/$r" $cashierToken "{}") "403"
-    Test-Case "DELETE cajero (sin permiso)" (Invoke-Api "DELETE" "/api/$r/$fakeId" $cashierToken $null) "403"
+    #                 label                  method   path             body   none   admin      waiter     cashier
+    Test-Endpoint "GET    lista"             "GET"    "/api/$r"        $null  @("401", "allowed", "allowed", "403")
+    Test-Endpoint "GET    por id"            "GET"    "/api/$r/$id"    $null  @("401", "allowed", "allowed", "403")
+    Test-Endpoint "POST   crear (vacio)"     "POST"   "/api/$r"        "{}"   @("401", "allowed", "-",       "403")
+    Test-Endpoint "PUT    editar (vacio)"    "PUT"    "/api/$r/$id"    "{}"   @("401", "allowed", "-",       "403")
+    Test-Endpoint "DELETE eliminar (id falso)" "DELETE" "/api/$r/$id"  $null  @("401", "allowed", "-",       "403")
 }
+
+Write-Host "`n== api/diningtables (disponibilidad) ==" -ForegroundColor Cyan
+Test-Endpoint "PATCH  disponibilidad"        "PATCH"  "/api/diningtables/$id/availability" $null @("401", "allowed", "-", "403")
+
+# ---------------------------------------------------------------------------
+# Orders: waiter = show/create/update (no pay); cashier = show/pay only.
+Write-Host "`n== api/orders ==" -ForegroundColor Cyan
+
+#                 label                      method   path                           body   none   admin      waiter     cashier
+Test-Endpoint "GET    lista"                 "GET"    "/api/orders"                  $null  @("401", "allowed", "allowed", "allowed")
+Test-Endpoint "GET    por id"                "GET"    "/api/orders/$id"              $null  @("401", "allowed", "allowed", "allowed")
+Test-Endpoint "POST   crear pedido"          "POST"   "/api/orders"                  "{}"   @("401", "allowed", "allowed", "403")
+Test-Endpoint "PUT    cambiar estado"        "PUT"    "/api/orders/status"           "{}"   @("401", "allowed", "allowed", "403")
+Test-Endpoint "POST   agregar plato"         "POST"   "/api/orders/details"          "{}"   @("401", "allowed", "allowed", "403")
+Test-Endpoint "DELETE quitar plato"          "DELETE" "/api/orders/details/$id"      $null  @("401", "allowed", "allowed", "403")
+Test-Endpoint "POST   cobrar (orders.pay)"   "POST"   "/api/orders/pay"              "{}"   @("401", "allowed", "403",     "allowed")
 
 Write-Host "`n== Resultado ==" -ForegroundColor Cyan
 Write-Host ("  Pasaron: {0}   Fallaron: {1}" -f $script:passed, $script:failed)
