@@ -8,5 +8,8 @@ namespace Restaurante.Web.DTOs.Roles
 
         [Display(Name = "Nombre del rol")]
         public string Name { get; set; } = string.Empty;
+
+      
+        public List<PermissionForRoleDTO> Permissions { get; set; } = [];
     }
 }

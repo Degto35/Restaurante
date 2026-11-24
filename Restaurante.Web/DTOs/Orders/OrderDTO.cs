@@ -13,8 +13,8 @@ namespace Restaurante.Web.DTOs.Orders
         public Guid DiningTableId { get; set; }
         public int TableNumber { get; set; }
 
-        public Guid EmployeeId { get; set; }
-        public string EmployeeName { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
+        public string UserFullName { get; set; } = string.Empty;
 
         public List<OrderDetailDTO> OrderDetails { get; set; } = new List<OrderDetailDTO>();
 

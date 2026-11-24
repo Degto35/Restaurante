@@ -4,6 +4,7 @@ using Restaurante.Web.Core.Pagination;
 using Restaurante.Web.DTOs.Dishes;
 using Restaurante.Web.Helpers.Abstractions;
 using Restaurante.Web.Services.Abstractions;
+using Restaurante.Web.Core.Attributes;
 
 namespace Restaurante.Web.Controllers
 {
@@ -19,6 +20,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("dishes.show")]
         public async Task<IActionResult> Index([FromQuery] PaginationRequest request)
         {
             Response<PaginationResponse<DishDTO>> response = await _dishesService.GetPaginationAsync(request);
@@ -33,6 +35,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("dishes.show")]
         public async Task<IActionResult> Details(Guid id)
         {
             Response<DishDTO> response = await _dishesService.GetOneAsync(id);
@@ -47,6 +50,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("dishes.create")]
         public async Task<IActionResult> Create()
         {
             CreateDishDTO dto = new CreateDishDTO
@@ -58,6 +62,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("dishes.create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateDishDTO dto)
         {
@@ -81,6 +86,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize("dishes.update")]
         public async Task<IActionResult> Edit(Guid id)
         {
             Response<DishDTO> response = await _dishesService.GetOneAsync(id);
@@ -106,6 +112,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("dishes.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UpdateDishDTO dto)
         {
@@ -129,6 +136,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
+        [CustomAuthorize("dishes.delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {

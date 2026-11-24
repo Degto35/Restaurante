@@ -16,7 +16,7 @@ namespace Restaurante.Web.Helpers.Implementations
 
         public async Task<List<SelectListItem>> GetRolesSelectListAsync()
         {
-            return await _context.Roles
+            return await _context.RestauranteRoles
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
@@ -25,14 +25,15 @@ namespace Restaurante.Web.Helpers.Implementations
                 }).ToListAsync();
         }
 
-        public async Task<List<SelectListItem>> GetEmployeesSelectListAsync()
+        public async Task<List<SelectListItem>> GetUsersSelectListAsync()
         {
-            return await _context.Employees
-                .OrderBy(e => e.Name)
-                .Select(e => new SelectListItem
+            return await _context.Users
+                .OrderBy(u => u.FirstName).ThenBy(u => u.LastName)
+                .Select(u => new SelectListItem
                 {
-                    Text = e.Name,
-                    Value = e.Id.ToString()
+                    
+                    Text = u.FirstName + " " + u.LastName,
+                    Value = u.Id
                 }).ToListAsync();
         }
 

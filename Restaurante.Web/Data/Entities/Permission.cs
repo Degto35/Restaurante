@@ -10,15 +10,15 @@ namespace Restaurante.Web.Data.Entities
 
         [Required]
         [MaxLength(32)]
-        public string Code { get; set; } = string.Empty;
+        public required string Code { get; set; }          
 
         [Required]
         [MaxLength(256)]
-        public string Description { get; set; } = string.Empty;
+        public required string Description { get; set; }   
 
         [Required]
         [MaxLength(32)]
-        public string Module { get; set; } = string.Empty;
+        public required string Module { get; set; }        
 
         public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
     }

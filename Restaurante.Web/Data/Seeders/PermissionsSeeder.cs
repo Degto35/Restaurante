@@ -16,12 +16,12 @@ namespace Restaurante.Web.Data.Seeders
         {
             List<Permission> permissions =
             [
-                ..Crud("categories", "Categorías", "Categorías"),
-                ..Crud("dishes", "Platos", "Platos"),
-                ..Crud("diningtables", "Mesas", "Mesas"),
-                ..Crud("employees", "Empleados", "Empleados"),
-                ..Crud("roles", "Roles", "Roles"),
-                ..Orders()
+                .. Crud("categories", "Categorías", "categorías"),
+                .. Crud("dishes", "Platos", "platos"),
+                .. Crud("tables", "Mesas", "mesas"),
+                .. Orders(),
+                .. Crud("users", "Usuarios", "usuarios"),
+                .. Crud("roles", "Roles", "roles"),
             ];
 
             foreach (Permission permission in permissions)
@@ -37,7 +37,6 @@ namespace Restaurante.Web.Data.Seeders
             await _context.SaveChangesAsync();
         }
 
-        // Crea los 4 permisos básicos (ver, crear, editar, eliminar) de un módulo
         private static List<Permission> Crud(string prefix, string module, string plural)
         {
             return new List<Permission>
@@ -49,15 +48,14 @@ namespace Restaurante.Web.Data.Seeders
             };
         }
 
-        // Los pedidos no se eliminan, pero sí se cobran
         private static List<Permission> Orders()
         {
             return new List<Permission>
             {
-                new Permission { Id = Guid.NewGuid(), Code = "orders.show", Description = "Ver Pedidos", Module = "Pedidos" },
-                new Permission { Id = Guid.NewGuid(), Code = "orders.create", Description = "Crear Pedidos", Module = "Pedidos" },
-                new Permission { Id = Guid.NewGuid(), Code = "orders.update", Description = "Editar Pedidos", Module = "Pedidos" },
-                new Permission { Id = Guid.NewGuid(), Code = "orders.pay", Description = "Cobrar Pedidos", Module = "Pedidos" },
+                new Permission { Id = Guid.NewGuid(), Code = "orders.show", Description = "Ver pedidos", Module = "Pedidos" },
+                new Permission { Id = Guid.NewGuid(), Code = "orders.create", Description = "Crear pedidos", Module = "Pedidos" },
+                new Permission { Id = Guid.NewGuid(), Code = "orders.update", Description = "Editar pedidos (platos y estado)", Module = "Pedidos" },
+                new Permission { Id = Guid.NewGuid(), Code = "orders.pay", Description = "Cobrar pedidos", Module = "Pedidos" },
             };
         }
     }

@@ -1,0 +1,30 @@
+﻿@model List<Restaurante.Web.DTOs.Roles.PermissionForRoleDTO>
+
+<h5 class="mt-4">Permisos</h5>
+
+<div class="row">
+    @foreach (var module in Model.GroupBy(p => p.Module))
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header fw-bold">@module.Key</div>
+                <div class="card-body">
+                    @foreach (var permission in module)
+                    {
+                        <div class="form-check form-switch">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="PermissionIds"
+                                   value="@permission.Id"
+                                   id="permission_@permission.Id"
+                                   checked="@permission.Selected" />
+                            <label class="form-check-label" for="permission_@permission.Id">
+                                @permission.Description
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

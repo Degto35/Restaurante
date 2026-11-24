@@ -8,10 +8,12 @@
 
 <partial name="_Alerts" />
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Crear Nueva Mesa</a>
-</p>
-
+@if (await AccountService.AccountUserIsAuthorizedAsync("tables.create"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Crear Nueva Mesa</a>
+    </p>
+}
 <form asp-action="Index" method="get" class="row g-2 mb-3">
     <div class="col-auto">
         <select name="RecordsPerPage" class="form-select" onchange="this.form.submit()">
@@ -40,6 +42,11 @@
         </tr>
     </thead>
     <tbody>
+        @{
+            bool canUpdate = await AccountService.AccountUserIsAuthorizedAsync("tables.update");
+            bool canDelete = await AccountService.AccountUserIsAuthorizedAsync("tables.delete");
+        }
+
         @if (!Model.List.Any())
         {
             <tr>
@@ -58,19 +65,29 @@
                     </span>
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                    @if (canUpdate)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                    }
+
                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm">Detalles</a>
 
-                    <form asp-action="ToggleAvailability" asp-route-id="@item.Id" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-secondary btn-sm">
-                            @(item.IsAvailable ? "Marcar ocupada" : "Marcar disponible")
-                        </button>
-                    </form>
+                    @if (canUpdate)
+                    {
+                        <form asp-action="ToggleAvailability" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-secondary btn-sm">
+                                @(item.IsAvailable ? "Marcar ocupada" : "Marcar disponible")
+                            </button>
+                        </form>
+                    }
 
-                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
-                          onsubmit="return confirm('¿Seguro que desea eliminar esta mesa?');">
-                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
+                    @if (canDelete)
+                    {
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                              onsubmit="return confirm('¿Seguro que desea eliminar esta mesa?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    }
                 </td>
             </tr>
         }

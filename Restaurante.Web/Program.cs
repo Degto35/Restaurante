@@ -1,8 +1,14 @@
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Restaurante.Web;
+
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    
+    options.Filters.Add(new AuthorizeFilter());
+});
 
 builder.AddCustomConfiguration();
 
@@ -16,7 +22,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -25,5 +31,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
 app.AddCustomWebApplicationConfiguration();
+
 app.Run();

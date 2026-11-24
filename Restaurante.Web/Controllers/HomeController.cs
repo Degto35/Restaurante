@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Restaurante.Web.Models;
 using System.Diagnostics;
-
+using Microsoft.AspNetCore.Authorization;
 namespace Restaurante.Web.Controllers
 {
     public class HomeController : Controller
@@ -15,7 +15,7 @@ namespace Restaurante.Web.Controllers
         {
             return View();
         }
-
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

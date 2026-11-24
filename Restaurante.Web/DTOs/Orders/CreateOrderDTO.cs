@@ -10,8 +10,8 @@ namespace Restaurante.Web.DTOs.Orders
 
         [Display(Name = "Mesero")]
         [Required(ErrorMessage = "Debe seleccionar un mesero.")]
-        public Guid EmployeeId { get; set; }
+        public string UserId { get; set; } = string.Empty;
         public IEnumerable<SelectListItem>? Tables { get; set; }
-        public IEnumerable<SelectListItem>? Employees { get; set; }
+        public IEnumerable<SelectListItem>? Users { get; set; }
     }
 }
