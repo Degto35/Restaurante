@@ -208,8 +208,13 @@ namespace Restaurante.Web.Services.Implementations
                     return Response.Failure("No se pudo cambiar la contraseña.", errors);
                 }
 
-                
-                await _signInManager.RefreshSignInAsync(user);
+
+                bool isApiCall = _httpContextAccessor.HttpContext?.Request.Path.StartsWithSegments("/api") == true;
+
+                if (!isApiCall)
+                {
+                    await _signInManager.RefreshSignInAsync(user);
+                }
 
                 return Response.Success("Contraseña actualizada correctamente.");
             }
