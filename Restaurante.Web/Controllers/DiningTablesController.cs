@@ -131,7 +131,7 @@ namespace Restaurante.Web.Controllers
         }
 
         [HttpPost]
-        [CustomAuthorize("Table.update")]
+        [CustomAuthorize("table.update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleAvailability(Guid id)
         {
