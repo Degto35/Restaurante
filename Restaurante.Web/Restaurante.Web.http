@@ -1,13 +1,14 @@
 # For more info on HTTP files go to https://aka.ms/vs/httpfile
 @baseUrl = https://localhost:7232
-@token = PEGA_AQUI_EL_TOKEN_SI_USAN_JWT
+@token = PEGA_AQUI_EL_TOKEN_DEVUELTO_POR_LOGIN
 
 # ==========================================
-# 1. AUTH / ACCOUNT (Inicio de sesión)
+# 1. AUTH (Inicio de sesión JWT)
 # ==========================================
 
 ### Login como SuperAdmin
-POST {{baseUrl}}/api/Account/Login
+# @name loginAdmin
+POST {{baseUrl}}/api/Auth/login
 Content-Type: application/json
 
 {
@@ -16,7 +17,7 @@ Content-Type: application/json
 }
 
 ### Login como Mesero (Laura - permisos: orders.show, orders.create, orders.update)
-POST {{baseUrl}}/api/Account/Login
+POST {{baseUrl}}/api/Auth/login
 Content-Type: application/json
 
 {
@@ -25,14 +26,13 @@ Content-Type: application/json
 }
 
 ### Login como Cajero (Pedro - permisos: orders.show, orders.pay)
-POST {{baseUrl}}/api/Account/Login
+POST {{baseUrl}}/api/Auth/login
 Content-Type: application/json
 
 {
   "email": "pedro@restaurante.com",
   "password": "1234"
 }
-
 # ==========================================
 # 2. CATEGORIES (Categorías)
 # ==========================================
