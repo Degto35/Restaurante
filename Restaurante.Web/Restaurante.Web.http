@@ -1,0 +1,198 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@baseUrl = https://localhost:7232
+@token = PEGA_AQUI_EL_TOKEN_SI_USAN_JWT
+
+# ==========================================
+# 1. AUTH / ACCOUNT (Inicio de sesión)
+# ==========================================
+
+### Login como SuperAdmin
+POST {{baseUrl}}/api/Account/Login
+Content-Type: application/json
+
+{
+  "email": "admin@restaurante.com",
+  "password": "1234"
+}
+
+### Login como Mesero (Laura - permisos: orders.show, orders.create, orders.update)
+POST {{baseUrl}}/api/Account/Login
+Content-Type: application/json
+
+{
+  "email": "laura@restaurante.com",
+  "password": "1234"
+}
+
+### Login como Cajero (Pedro - permisos: orders.show, orders.pay)
+POST {{baseUrl}}/api/Account/Login
+Content-Type: application/json
+
+{
+  "email": "pedro@restaurante.com",
+  "password": "1234"
+}
+
+# ==========================================
+# 2. CATEGORIES (Categorías)
+# ==========================================
+
+### Obtener categorías paginadas
+GET {{baseUrl}}/api/Categories?Page=1&RecordsPerPage=10
+Authorization: Bearer {{token}}
+
+### Crear categoría
+POST {{baseUrl}}/api/Categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Bebidas Naturales",
+  "description": "Jugos y limonadas preparadas al momento",
+  "isActive": true
+}
+
+### Actualizar categoría
+PUT {{baseUrl}}/api/Categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "name": "Bebidas Frías",
+  "description": "Bebidas refrescantes",
+  "isActive": true
+}
+
+### Eliminar categoría
+DELETE {{baseUrl}}/api/Categories/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+# ==========================================
+# 3. DISHES (Platos)
+# ==========================================
+
+### Obtener platos paginados
+GET {{baseUrl}}/api/Dishes?Page=1&RecordsPerPage=10
+Authorization: Bearer {{token}}
+
+### Crear plato
+POST {{baseUrl}}/api/Dishes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Bandeja Paisa",
+  "description": "Plato típico completo",
+  "price": 32000,
+  "categoryId": "00000000-0000-0000-0000-000000000000",
+  "isActive": true
+}
+
+### Actualizar plato
+PUT {{baseUrl}}/api/Dishes
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "name": "Bandeja Paisa Especial",
+  "description": "Con chicharrón extra",
+  "price": 35000,
+  "categoryId": "00000000-0000-0000-0000-000000000000",
+  "isActive": true
+}
+
+### Eliminar plato
+DELETE {{baseUrl}}/api/Dishes/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+# ==========================================
+# 4. DINING TABLES (Mesas)
+# ==========================================
+
+### Obtener mesas paginadas
+GET {{baseUrl}}/api/DiningTables?Page=1&RecordsPerPage=10
+Authorization: Bearer {{token}}
+
+### Crear mesa
+POST {{baseUrl}}/api/DiningTables
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "number": 10,
+  "capacity": 4
+}
+
+### Actualizar mesa
+PUT {{baseUrl}}/api/DiningTables
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "number": 10,
+  "capacity": 6
+}
+
+### Eliminar mesa
+DELETE {{baseUrl}}/api/DiningTables/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+# ==========================================
+# 5. ORDERS (Pedidos - Tu módulo)
+# ==========================================
+
+### Listar pedidos paginados
+GET {{baseUrl}}/api/Orders?Page=1&RecordsPerPage=10
+Authorization: Bearer {{token}}
+
+### Consultar detalle de un pedido por ID
+GET {{baseUrl}}/api/Orders/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### Crear un nuevo pedido (ocupa la mesa automáticamente)
+POST {{baseUrl}}/api/Orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "diningTableId": "00000000-0000-0000-0000-000000000000",
+  "userId": "ID_DEL_MESERO_EN_ASPNETUSERS"
+}
+
+### Agregar plato al pedido
+POST {{baseUrl}}/api/Orders/details
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "orderId": "00000000-0000-0000-0000-000000000000",
+  "dishId": "00000000-0000-0000-0000-000000000000",
+  "quantity": 2
+}
+
+### Eliminar línea de detalle del pedido
+DELETE {{baseUrl}}/api/Orders/details/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{token}}
+
+### Cambiar estado del pedido (0=Pending, 1=InProgress, 2=Served, 4=Cancelled)
+PUT {{baseUrl}}/api/Orders/status
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "status": 1
+}
+
+### Pagar pedido (0=Cash, 1=Card, 2=Transfer - libera la mesa y genera factura)
+POST {{baseUrl}}/api/Orders/pay
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "orderId": "00000000-0000-0000-0000-000000000000",
+  "paymentMethod": 0
+}
